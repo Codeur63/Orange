@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #000000;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+}
+
+html {
+  overflow-x: clip;
+}
+
+body {
+  background: #ffffff;
+  color: #000000;
+  /* `clip` (et non `hidden`) évite de créer un conteneur de défilement,
+     ce qui casserait le positionnement sticky de la section Programme. */
+  overflow-x: clip;
+}
+
+/* ------------------------------------------------------------------ */
+/* Hero animations                                                     */
+/* ------------------------------------------------------------------ */
+@keyframes heroZoom {
+  from {
+    transform: scale(1.14);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes heroFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes heroFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes heroScroll {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.35;
+  }
+  50% {
+    transform: translateY(9px);
+    opacity: 1;
+  }
+}
+
+.hero-zoom {
+  animation: heroZoom 22s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.hero-fade-up {
+  animation: heroFadeUp 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.hero-fade-in {
+  animation: heroFadeIn 1.4s ease-out both;
+}
+
+.hero-scroll {
+  animation: heroScroll 2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-zoom,
+  .hero-fade-up,
+  .hero-fade-in,
+  .hero-scroll {
+    animation: none !important;
+  }
+}
