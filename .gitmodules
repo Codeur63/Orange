@@ -1,0 +1,6 @@
+[submodule ".codex/impeccable"]
+	path = .codex/impeccable
+	url = https://github.com/pbakaus/impeccable.git
+[submodule ".codex/unslop"]
+	path = .codex/unslop
+	url = https://github.com/theclaymethod/unslop.git

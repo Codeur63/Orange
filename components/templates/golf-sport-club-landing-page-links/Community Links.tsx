@@ -9,10 +9,10 @@ import { useEffect, useRef, useState, type CSSProperties, type ElementType, type
 const FONT_URL = 'https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700&display=swap'
 /** `face: true` zooms a full-body portrait in on the face. */
 const AVATARS = [
-  { src: 'https://cdn.jiro.build/Golf/a1.png', face: false },
-  { src: 'https://cdn.jiro.build/Golf/a2.webp', face: false },
-  { src: 'https://cdn.jiro.build/Golf/t1.webp', face: true },
-  { src: 'https://cdn.jiro.build/Golf/t2.webp', face: true },
+  { src: '/avatars/a1.webp', face: false },
+  { src: '/avatars/a2.webp', face: false },
+  { src: '/avatars/t1.webp', face: true },
+  { src: '/avatars/t2.webp', face: true },
 ]
 /** Shown when an image link fails, so the tile colour shows instead of a broken-image icon. */
 const BLANK = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
@@ -21,9 +21,8 @@ const BLANK = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAA
 const TAGLINE = 'Le golf Orange au Cameroun'
 const HEADLINE = 'Deux rendez-vous autour du golf'
 const PARAGRAPHS = [
-  'À Douala, le Golf Open Day invite à découvrir le golf et à vivre l’événement de près.',
-  'À Kribi, l’Orange Golf Experience réunit les dirigeants, clients et partenaires d’Orange Business pour deux jours de golf et de rencontres professionnelles.',
-  'Que vous veniez pour découvrir le jeu à Douala ou pour échanger avec d’autres professionnels à Kribi, retrouvez ici les informations de chaque rendez-vous.',
+  'À Douala, le Golf Open Day est l’occasion de découvrir le golf. Des professionnels vous accompagnent lors de l’initiation. Le matériel est fourni, et les ateliers de putting, de drive et d’approche sont ouverts à tous les participants.',
+  'À Kribi, l’Orange Golf Experience réunit les dirigeants, clients et partenaires d’Orange Business au Kribi Golf & Country Club. Le tournoi se joue en bord de mer, et les échanges se poursuivent le lendemain autour de tables rondes au club-house.',
 ]
 const CITIES = ['Douala', 'Kribi']
 const MEMBER_COUNT = '120+'
@@ -34,7 +33,7 @@ const micro = 'text-[12px] font-medium uppercase leading-[1.3]'
 
 function Members({ size = 44 }: { size?: number }) {
   return (
-    <div className="flex items-center">
+    <div role="img" aria-label="Membres de la communauté Orange Golf" className="flex items-center">
       {AVATARS.map((a, i) => (
         <span
           key={i}
@@ -221,14 +220,20 @@ function prefersReducedMotion() {
 function Reveal({ children, delay = 0, as: Tag = 'div', className = '', style }: { children: ReactNode; delay?: number; as?: ElementType; className?: string; style?: CSSProperties }) {
   const ref = useRef<HTMLElement>(null)
   const [shown, setShown] = useState(false)
-  const [still] = useState(prefersReducedMotion)
+  const [still, setStill] = useState(false)
   useEffect(() => {
     const el = ref.current
-    if (!el || still) return
+    /* Lire la préférence seulement après l'hydratation : sinon le serveur et le client divergent. */
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    setStill(reduced)
+    if (!el || reduced) {
+      setShown(true)
+      return
+    }
     const io = new IntersectionObserver(([e]) => setShown(e.isIntersecting), { threshold: 0.15 })
     io.observe(el)
     return () => io.disconnect()
-  }, [still])
+  }, [])
   const on = still || shown
   return (
     <Tag

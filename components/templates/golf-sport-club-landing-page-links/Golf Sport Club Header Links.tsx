@@ -3,36 +3,27 @@
  * 100% self-contained.
  * Needs: only React 18 + Tailwind CSS. Fonts load from Google Fonts (no npm package).
  */
-import { Fragment, useEffect, useRef, useState, type CSSProperties, type ElementType, type ReactNode, type SVGProps } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type ElementType, type ReactNode, type SVGProps } from 'react'
+
+import { PROGRAMMES } from './programmes'
 
 /* ---------- Fonts & images ---------- */
 const FONT_URL = 'https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700&display=swap'
-const HERO_PHOTO = '/Header.png'
-const EVENT_PHOTO = 'https://cdn.jiro.build/Golf/a1.png'
+const HERO_PHOTO = '/Header.webp'
 
 /* ---------- Content ---------- */
 const NAV_LINKS = [
-  { label: 'About', href: '#about' },
-  { label: 'Shop', href: '#shop' },
-  { label: 'Inscription', href: '#levels' },
+  { label: 'À propos', href: '#about' },
   { label: 'Agenda', href: '#happening' },
-  { label: 'Facilities', href: '#programs' },
+  { label: 'Programme', href: '#programs' },
   { label: 'Galerie', href: '#gallery' },
+  { label: 'Inscription', href: '#levels' },
 ]
-const EVENT = { dates: 'October 24–25', city: 'Napa', title: 'Autumn Classic', image: EVENT_PHOTO, href: '#events' }
 const COORDS = '38° 17′ 49″ – 122° 17′ 9″ W'
 const EST = 'EST.98'
-const INTRO = 'Deux jours de golf et de rencontres pour les dirigeants, clients et partenaires d’Orange Business.'
-const SOCIALS = [
-  { label: 'X', href: '#', Icon: XIcon },
-  { label: 'Instagram', href: '#', Icon: InstagramIcon },
-  { label: 'LinkedIn', href: '#', Icon: LinkedinIcon },
-]
 
 const HERO_H = 613
 const MARQUEE_H = 78
-const ICON_CIRCLE =
-  'transition-[background-color,color,border-color,transform] duration-300 hover:-translate-y-[2px] hover:border-[#FFFFFF] hover:bg-[#FFFFFF] hover:text-[#000000]'
 const LABEL_M = 'text-[17px] font-medium leading-[1.3] tracking-[-0.005em]'
 /** If an image link fails, hide the broken-image icon (the tile colour shows instead). */
 const hideBroken = (e: { currentTarget: HTMLImageElement }) => (e.currentTarget.style.visibility = 'hidden')
@@ -64,21 +55,15 @@ function DesktopNav() {
       style={{ width: FRAME_W, transform: `translateX(-50%) scale(${s}) ${hidden ? 'translateY(-120%)' : ''}`, transformOrigin: 'center top' }}
     >
       <div style={{ width: FIGMA_W, transform: `scale(${FIT})`, transformOrigin: 'left top' }}>
-        <nav aria-label="Main" className="pointer-events-auto relative ml-[24px] mt-[16px] flex h-[64px] w-[1392px] items-center justify-between rounded-[14px] bg-[#000000] pl-[22px] pr-[10px]">
+        <nav aria-label="Navigation principale" className="pointer-events-auto relative ml-[24px] mt-[16px] flex h-[64px] w-[1392px] items-center justify-between rounded-[14px] bg-[#000000] px-[22px]">
           <Logo />
-          <ul className="absolute left-[468.5px] top-[21px] flex gap-[44px]">
+          <ul className="flex gap-[44px]">
             {NAV_LINKS.map((l) => (
               <li key={l.label}>
                 <TextLink href={l.href} className={`${LABEL_M} text-[#FFFFFF]`}>{l.label}</TextLink>
               </li>
             ))}
           </ul>
-          <div className="flex items-center gap-[18px]">
-            <TextLink href="#login" underlined className={`${LABEL_M} text-[#FFFFFF]`}>Log In</TextLink>
-            <button aria-label="Search" className={`flex h-[44px] w-[44px] items-center justify-center rounded-full border-[1.2px] border-[#FFFFFF]/60 text-[#FFFFFF] ${ICON_CIRCLE}`}>
-              <SearchIcon />
-            </button>
-          </div>
         </nav>
       </div>
     </div>
@@ -90,25 +75,21 @@ function MobileNav() {
   const hidden = useHideOnScroll()
   return (
     <div className={`site-header fixed inset-x-3 top-3 z-50 transition-transform duration-500 ${hidden && !open ? '-translate-y-[130%]' : ''}`}>
-      <nav aria-label="Main" className="rounded-[14px] bg-[#000000] px-4 text-[#FFFFFF] shadow-lg">
+      <nav aria-label="Navigation principale" className="rounded-[14px] bg-[#000000] px-4 text-[#FFFFFF] shadow-lg">
         <div className="flex h-14 items-center justify-between">
           <Logo className="!text-[26px]" />
-          <div className="flex items-center gap-2">
-            <button aria-label="Search" className="flex h-10 w-10 items-center justify-center rounded-full border border-[#FFFFFF]/60">
-              <SearchIcon size={18} />
-            </button>
-            <button
-              aria-label={open ? 'Close menu' : 'Open menu'}
-              aria-expanded={open}
-              onClick={() => setOpen((o) => !o)}
-              className="relative flex h-10 w-10 items-center justify-center rounded-full bg-[#FF7900] text-[#000000]"
-            >
-              <span className={`absolute h-[1.5px] w-4 bg-current transition-transform duration-300 ${open ? 'rotate-45' : '-translate-y-[4px]'}`} />
-              <span className={`absolute h-[1.5px] w-4 bg-current transition-transform duration-300 ${open ? '-rotate-45' : 'translate-y-[4px]'}`} />
-            </button>
-          </div>
+          <button
+            aria-label={open ? 'Fermer le menu' : 'Ouvrir le menu'}
+            aria-controls="golf-mobile-menu"
+            aria-expanded={open}
+            onClick={() => setOpen((o) => !o)}
+            className="relative flex h-10 w-10 items-center justify-center rounded-full bg-[#FF7900] text-[#000000]"
+          >
+            <span className={`absolute h-[1.5px] w-4 bg-current transition-transform duration-300 ${open ? 'rotate-45' : '-translate-y-[4px]'}`} />
+            <span className={`absolute h-[1.5px] w-4 bg-current transition-transform duration-300 ${open ? '-rotate-45' : 'translate-y-[4px]'}`} />
+          </button>
         </div>
-        <div className={`grid transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>
+        <div id="golf-mobile-menu" inert={!open} className={`grid transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>
           <ul className="overflow-hidden">
             {NAV_LINKS.map((l, i) => (
               <li key={l.label} className="border-t border-[#FFFFFF]/15 first:mt-1">
@@ -122,10 +103,6 @@ function MobileNav() {
                 </a>
               </li>
             ))}
-            <li className="flex items-center justify-between border-t border-[#FFFFFF]/15 py-4">
-              <a href="#login" className="text-[17px] font-medium underline underline-offset-4">Log In</a>
-              <a href="#join" className="rounded-full bg-[#FF7900] px-5 py-2.5 text-[15px] font-medium text-[#000000]">Join the Club</a>
-            </li>
           </ul>
         </div>
       </nav>
@@ -134,90 +111,30 @@ function MobileNav() {
 }
 
 /* ---------- Hero ---------- */
-function HeroDesktop() {
+function EventHero() {
   return (
-    <section id="hero" className="relative flex min-h-[100svh] w-full flex-col overflow-hidden bg-[#000000]">
-      <img
-        src={HERO_PHOTO}
-        alt="Orange Golf Experience — golfeur sur le parcours de Kribi"
-        className="hero-zoom absolute inset-0 h-full w-full object-cover object-[62%_center]"
-      />
-      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.82)_0%,rgba(0,0,0,0.48)_45%,rgba(0,0,0,0.06)_100%)]" />
-      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.55)_0%,rgba(0,0,0,0)_32%,rgba(0,0,0,0.8)_100%)]" />
-
-      {/* subtle orange glow for depth */}
-      <div className="hero-fade-in pointer-events-none absolute -left-40 top-1/3 h-[420px] w-[420px] rounded-full bg-[#FF7900]/20 blur-[120px]" />
-
-      <div className="relative mx-auto flex w-full max-w-[1400px] flex-1 flex-col justify-center px-6 py-28 md:px-10">
-        <p className="hero-fade-up text-[13px] font-semibold uppercase tracking-[0.3em] text-[#FF7900]" style={{ animationDelay: '0.1s' }}>
-          Orange Business · Cameroun
-        </p>
-
-        <h1 className="hero-fade-up mt-5 max-w-[900px] text-[clamp(2.9rem,7vw,7rem)] font-bold leading-[0.92] tracking-[-0.04em] text-white" style={{ animationDelay: '0.28s' }}>
-          Orange Golf<br />Experience<span className="text-[#FF7900]">.</span>
+    <section id="hero" className="relative isolate flex min-h-[100svh] items-center overflow-hidden bg-black text-white">
+      <img src={HERO_PHOTO} alt="Golfeur sur un parcours lors d’un événement Orange Golf au Cameroun" fetchPriority="high" decoding="async" className="hero-zoom absolute inset-0 -z-20 h-full w-full object-cover object-[62%_center]" />
+      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-black/65 via-black/65 to-black/95" />
+      <div className="mx-auto w-full max-w-[1400px] px-6 pb-14 pt-28 md:px-10 md:py-32">
+        <h1 className="hero-fade-up max-w-[18ch] text-[clamp(2.5rem,7vw,6rem)] font-bold leading-[0.98] tracking-[-0.04em]">
+          Orange Golf Cameroun
         </h1>
-
-        <p className="hero-fade-up mt-7 max-w-[560px] text-[17px] font-medium leading-[1.55] text-white/85 md:text-[19px]" style={{ animationDelay: '0.48s' }}>
-          {INTRO}
-        </p>
-
-        <div className="hero-fade-up mt-9 flex flex-wrap items-center gap-3" style={{ animationDelay: '0.68s' }}>
-          <Button variant="lime" href="#programs" className="h-[58px] px-8 text-[16px] leading-[1.3] tracking-[-0.01em]">Découvrir l’événement</Button>
-          <a href="#about" className="inline-flex h-[58px] items-center gap-2 rounded-full border border-white/40 px-7 text-[15px] font-medium text-white transition-colors duration-300 hover:bg-white/10">
-            En savoir plus
-          </a>
+        <div className="mt-9 grid gap-7 md:mt-14 md:grid-cols-2 md:gap-10">
+          {(['kribi', 'douala'] as const).map((key) => {
+            const { city, date, event, intro } = PROGRAMMES[key]
+            return (
+              <div key={key} className="flex flex-col items-start border-t border-white/40 pt-4 md:pt-6">
+                <p className="text-sm font-semibold text-[#FF9A40]">{city} · {date}</p>
+                <h2 className="mt-2 text-[clamp(1.5rem,3.5vw,2.75rem)] font-bold leading-tight tracking-[-0.025em]">{event}</h2>
+                <p className="mb-4 mt-2 max-w-[48ch] text-[15px] leading-relaxed text-white/90 md:text-base">{intro}</p>
+                <a href={`#programme-${key}`} className="mt-auto inline-flex min-h-11 items-center font-semibold underline decoration-[#FF9A40] underline-offset-4 hover:text-[#FF9A40]">
+                  Voir le programme de {city}
+                </a>
+              </div>
+            )
+          })}
         </div>
-
-        <div className="hero-fade-up mt-14 flex flex-wrap items-center gap-x-8 gap-y-3 border-t border-white/15 pt-6" style={{ animationDelay: '0.88s' }}>
-          {[
-            { v: '2', l: 'jours de golf' },
-            { v: 'Kribi', l: 'Cameroun' },
-            { v: 'B2B', l: 'dirigeants & partenaires' },
-          ].map((s) => (
-            <div key={s.l} className="flex items-baseline gap-3">
-              <span className="text-[26px] font-bold text-[#FF7900]">{s.v}</span>
-              <span className="text-[12px] uppercase tracking-[0.14em] text-white/60">{s.l}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* scroll hint */}
-      <div className="hero-fade-in pointer-events-none absolute bottom-28 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-2 md:flex" style={{ animationDelay: '1.1s' }}>
-        <span className="text-[10px] uppercase tracking-[0.3em] text-white/50">Défiler</span>
-        <span className="hero-scroll block h-6 w-px bg-white/60" />
-      </div>
-
-      <div className="relative w-full">
-        <Marquee />
-      </div>
-    </section>
-  )
-}
-
-function HeroMobile() {
-  return (
-    <section id="hero" className="relative flex min-h-[100svh] w-full flex-col overflow-hidden bg-[#000000]">
-      <img src={HERO_PHOTO} alt="Orange Golf Experience" className="hero-zoom absolute inset-0 h-full w-full object-cover object-[66%_center]" />
-      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.7)_0%,rgba(0,0,0,0.35)_42%,rgba(0,0,0,0.95)_100%)]" />
-
-      <div className="relative mx-auto flex w-full max-w-[1400px] flex-1 flex-col justify-center px-6 pb-16 pt-32">
-        <span className="hero-fade-up inline-flex w-fit items-center rounded-full bg-[#FF7900] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-[#000000]" style={{ animationDelay: '0.08s' }}>
-          Orange Business
-        </span>
-        <h1 className="hero-fade-up mt-5 text-[clamp(2.6rem,12vw,4.6rem)] font-bold leading-[0.94] tracking-[-0.04em] text-white" style={{ animationDelay: '0.24s' }}>
-          Orange Golf<br />Experience<span className="text-[#FF7900]">.</span>
-        </h1>
-        <p className="hero-fade-up mt-6 max-w-[360px] text-[15px] font-medium leading-[1.55] text-white/85" style={{ animationDelay: '0.44s' }}>
-          {INTRO}
-        </p>
-        <div className="hero-fade-up mt-8" style={{ animationDelay: '0.64s' }}>
-          <Button variant="lime" href="#programs" className="h-[56px] px-7 text-[16px] font-medium">Découvrir l’événement</Button>
-        </div>
-      </div>
-
-      <div className="relative w-full">
-        <Marquee height={56} size={18} />
       </div>
     </section>
   )
@@ -225,20 +142,10 @@ function HeroMobile() {
 
 export default function Hero() {
   return (
-    <Responsive
-      desktop={
-        <>
-          <DesktopNav />
-          <HeroDesktop />
-        </>
-      }
-      mobile={
-        <>
-          <MobileNav />
-          <HeroMobile />
-        </>
-      }
-    />
+    <div className="font-['Archivo',sans-serif] antialiased">
+      <Responsive desktop={<DesktopNav />} mobile={<MobileNav />} />
+      <EventHero />
+    </div>
   )
 }
 
@@ -321,14 +228,20 @@ function prefersReducedMotion() {
 function Reveal({ children, delay = 0, as: Tag = 'div', className = '', style }: { children: ReactNode; delay?: number; as?: ElementType; className?: string; style?: CSSProperties }) {
   const ref = useRef<HTMLElement>(null)
   const [shown, setShown] = useState(false)
-  const [still] = useState(prefersReducedMotion)
+  const [still, setStill] = useState(false)
   useEffect(() => {
     const el = ref.current
-    if (!el || still) return
+    /* Lire la préférence seulement après l'hydratation : sinon le serveur et le client divergent. */
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    setStill(reduced)
+    if (!el || reduced) {
+      setShown(true)
+      return
+    }
     const io = new IntersectionObserver(([e]) => setShown(e.isIntersecting), { threshold: 0.15 })
     io.observe(el)
     return () => io.disconnect()
-  }, [still])
+  }, [])
   const on = still || shown
   return (
     <Tag
@@ -354,7 +267,7 @@ const BUTTON_VARIANTS = {
 }
 
 /** Pill button: fill sweeps in from the left, label rolls up, button lifts; shrinks on click. */
-function Button({ children, variant = 'lime', href = '#join', className = '' }: { children: ReactNode; variant?: keyof typeof BUTTON_VARIANTS; href?: string; className?: string }) {
+function Button({ children, variant = 'lime', href = '#levels', className = '' }: { children: ReactNode; variant?: keyof typeof BUTTON_VARIANTS; href?: string; className?: string }) {
   const v = BUTTON_VARIANTS[variant]
   const ease = 'ease-[cubic-bezier(0.16,1,0.3,1)]'
   return (
@@ -394,61 +307,9 @@ function Logo({ className = '' }: { className?: string }) {
   )
 }
 
-const MARQUEE_ITEMS = ['Orange Golf Experience', 'Deux jours de golf & de rencontres', 'Kribi · Cameroun', 'Orange Business']
-
-/** Dark ticker strip. Content is repeated `copies` times and slid by one copy (Web Animations API); pauses on hover. */
-function Marquee({ height = 78, size = 26, reverse = false, offset = 43, copies = 2, duration = 38000 }: { height?: number; size?: number; reverse?: boolean; offset?: number; copies?: number; duration?: number }) {
-  const track = useRef<HTMLDivElement>(null)
-  const anim = useRef<Animation>()
-  useEffect(() => {
-    if (!track.current || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    anim.current = track.current.animate([{ transform: 'translateX(0)' }, { transform: `translateX(-${100 / copies}%)` }], {
-      duration,
-      iterations: Infinity,
-      direction: reverse ? 'reverse' : 'normal',
-    })
-    return () => anim.current?.cancel()
-  }, [copies, duration, reverse])
-  const icon = Math.round(size * 0.846)
-  const gap = Math.round(size * 1.31)
-  const set = (k: number) => (
-    <div key={k} className="flex shrink-0 items-center" style={{ gap, paddingRight: gap }}>
-      {MARQUEE_ITEMS.map((t) => (
-        <Fragment key={t}>
-          <span className="whitespace-nowrap font-bold uppercase leading-[1.2] tracking-[-0.01em] text-[#FFFFFF]" style={{ fontSize: size }}>
-            {t}
-          </span>
-          <CopyrightIcon size={icon} color="#FF7900" className="shrink-0" />
-        </Fragment>
-      ))}
-    </div>
-  )
-  return (
-    <div
-      className="relative flex w-full items-center overflow-hidden bg-[#000000]"
-      style={{ height }}
-      aria-label={MARQUEE_ITEMS.join(' ')}
-      onMouseEnter={() => anim.current?.pause()}
-      onMouseLeave={() => anim.current?.play()}
-    >
-      <div ref={track} className="flex w-max" style={{ marginLeft: -offset * (size / 26) }} aria-hidden>
-        {Array.from({ length: copies }, (_, k) => set(k))}
-      </div>
-    </div>
-  )
-}
-
 type IconProps = SVGProps<SVGSVGElement> & { size?: number; stroke?: number }
 
-function CopyrightIcon({ size = 22, stroke, color = 'currentColor', ...p }: IconProps & { color?: string }) {
-  const sw = stroke ?? size * 0.1167
-  return (
-    <svg width={size} height={size} viewBox="0 0 60 60" fill="none" {...p}>
-      <circle cx="30" cy="30" r="24" stroke={color} strokeWidth={(sw * 60) / size} />
-      <path d="M38.5 24.5a10 10 0 1 0 0 11" stroke={color} strokeWidth={(sw * 60) / size} />
-    </svg>
-  )
-}
+
 
 function InstagramIcon({ size = 20, ...p }: IconProps) {
   return (
@@ -464,15 +325,6 @@ function LinkedinIcon({ size = 20, ...p }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.67" strokeLinecap="round" {...p}>
       <path d="M6.2 8.4V15M6.2 5.2v.1M9.6 15V8.4M9.6 11.2c0-1.6 1.1-2.8 2.5-2.8s2.2 1 2.2 2.6V15" />
-    </svg>
-  )
-}
-
-function SearchIcon({ size = 20, ...p }: IconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" {...p}>
-      <circle cx="9.2" cy="9.2" r="5.4" />
-      <path d="M13.3 13.3 16.7 16.7" />
     </svg>
   )
 }

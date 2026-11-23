@@ -1,177 +1,284 @@
 /**
- * Levels — level accordion, swing assessment, testimonial carousel
+ * Inscription — choix du profil (partenaire / joueur), de l'événement et formulaire de demande.
  * 100% self-contained.
  * Needs: only React 18 + Tailwind CSS. Fonts load from Google Fonts (no npm package).
  */
-import { useEffect, useRef, useState, type CSSProperties, type ElementType, type ReactNode, type SVGProps } from 'react'
+import { useEffect, useRef, useState, type ChangeEvent, type CSSProperties, type ElementType, type FormEvent, type ReactNode, type SVGProps } from 'react'
+
+import { PROGRAMMES, type EventKey as CityKey } from './programmes'
 
 /* ---------- Fonts & images ---------- */
 const FONT_URL = 'https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700&display=swap'
-const PHOTO = 'https://cdn.jiro.build/Golf/l1.webp'
-/** Testimonial avatars (full-body portraits, zoomed in on the face). */
-const MAYA = 'https://cdn.jiro.build/Golf/t4.webp'
-const DANIEL = 'https://cdn.jiro.build/Golf/t5.webp'
-const PRIYA = 'https://cdn.jiro.build/Golf/t2.webp'
 
 /* ---------- Content ---------- */
-const LABEL = '[ Choisissez votre événement ]'
-const LINE_1 = ['Votre place', 'sur le green.']
-const LINE_2 = 'Douala ou Kribi : à vous de choisir.'
-const LEVELS = [
-  { title: 'Douala · Golf Open Day', description: 'Une journée de compétition sur le parcours et de découverte du golf au bord du green.' },
-  { title: 'Kribi · Orange Golf Experience', description: 'Deux jours de golf au Kribi Golf & Country Club et de rencontres avec les clients et partenaires d’Orange Business.' },
-  { title: 'Les deux rendez-vous', description: 'Pourquoi choisir ? Inscrivez-vous aux deux événements et vivez toute l’expérience Orange Golf.' },
+const BODY = 'Choisissez votre profil et l’événement auquel vous souhaitez participer.'
+
+type ProfileKey = 'partenaire' | 'joueur'
+type EventKey = CityKey | 'les-deux'
+
+const PROFILES: Record<ProfileKey, { title: string; subtitle: string; blurb: string }> = {
+  partenaire: {
+    title: 'Partenaire',
+    subtitle: 'Stand & visibilité',
+    blurb: 'Réservez un stand et rencontrez les dirigeants, clients et partenaires présents.',
+  },
+  joueur: {
+    title: 'Joueur & participant',
+    subtitle: 'Tournoi & découverte',
+    blurb: 'Jouez, découvrez le golf et partagez la journée avec la communauté Orange.',
+  },
+}
+
+const EVENTS: { value: EventKey; label: string }[] = [
+  { value: 'douala', label: `Douala · ${PROGRAMMES.douala.event}` },
+  { value: 'kribi', label: `Kribi · ${PROGRAMMES.kribi.event}` },
+  { value: 'les-deux', label: 'Les deux événements' },
 ]
-const DEFAULT_LEVEL = 1
-const QUESTION = 'Besoin d’aide pour choisir ?'
-const NOTE = 'Découvrez le programme de chaque événement, puis réservez la place qui vous correspond.'
-const LINK = { label: 'Voir les programmes', href: '#programs' }
-const BUTTON = 'S’inscrire à l’événement'
-const TESTIMONIALS = [
-  { name: 'Équipe Orange Golf', avatar: MAYA, quote: '« Un parcours clair : vous choisissez Douala, Kribi ou les deux, et nous nous occupons du reste. »' },
-  { name: 'Participants · Douala', avatar: DANIEL, quote: '« Une journée de golf ouverte à tous, avec initiation et compétition sur le parcours. »' },
-  { name: 'Participants · Kribi', avatar: PRIYA, quote: '« Deux jours de golf et de rencontres avec les clients et partenaires d’Orange Business. »' },
-]
-const TESTIMONIAL_MS = 6000
 
-const heading = 'text-[50px] font-medium leading-[1.08] tracking-[-0.03em]'
-const name = 'text-[20px] font-medium leading-[1.25] tracking-[-0.01em]'
+const label = 'block text-[12px] font-semibold uppercase tracking-[0.14em] text-[#000000]/65'
+const inputBase =
+  'h-10 w-full rounded-none border-b border-black/40 bg-transparent px-0 text-base text-black outline-none placeholder:text-[#666666] focus:border-[#A64200] focus:shadow-[0_1px_0_#A64200] aria-invalid:border-[#C2410C]'
+const errorText = 'mt-1 text-[12px] font-medium leading-[1.4] text-[#B23A0A]'
 
-/** Progress ring that fills over TESTIMONIAL_MS (Web Animations API, restarts when `k` changes). */
-function Ring({ k }: { k: number }) {
-  const ref = useRef<SVGCircleElement>(null)
-  useEffect(() => {
-    const a = ref.current?.animate([{ strokeDashoffset: 69.1 }, { strokeDashoffset: 0 }], { duration: TESTIMONIAL_MS, easing: 'linear', fill: 'both' })
-    return () => a?.cancel()
-  }, [k])
+type FormValues = {
+  name: string
+  email: string
+  phone: string
+  company: string
+  stand: string
+  level: string
+  formula: string
+  message: string
+}
+const EMPTY_FORM: FormValues = { name: '', email: '', phone: '', company: '', stand: 'Standard', level: 'Débutant', formula: 'Initiation', message: '' }
+
+function ProfileChooser({ value, onChange }: { value: ProfileKey; onChange: (p: ProfileKey) => void }) {
   return (
-    <svg width="22" height="22" viewBox="0 0 26 26" className="-rotate-90" aria-hidden>
-      <circle cx="13" cy="13" r="11" fill="none" stroke="rgba(255,121,0,.25)" strokeWidth="2.4" />
-      <circle ref={ref} cx="13" cy="13" r="11" fill="none" stroke="#FF7900" strokeWidth="2.4" strokeLinecap="round" strokeDasharray="69.1" strokeDashoffset="69.1" />
-    </svg>
+    <fieldset className="grid grid-cols-2 gap-2">
+      <legend className={`${label} mb-2`}>Votre profil</legend>
+      {(Object.keys(PROFILES) as ProfileKey[]).map((key) => (
+        <label key={key} className="relative cursor-pointer">
+          <input type="radio" name="registration-profile" checked={value === key} onChange={() => onChange(key)} className="peer sr-only" />
+          <span className="flex min-h-11 items-center justify-center rounded-md border border-black/25 px-2 py-2 text-center text-sm font-semibold peer-checked:border-black peer-checked:bg-black peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[#A64200]">
+            {key === 'joueur' ? 'Joueur' : PROFILES[key].title}
+          </span>
+        </label>
+      ))}
+    </fieldset>
   )
 }
 
-function Testimonial({ className = '' }: { className?: string }) {
-  const [i, setI] = useState(0)
-  useEffect(() => {
-    const t = window.setTimeout(() => setI((n) => (n + 1) % TESTIMONIALS.length), TESTIMONIAL_MS)
-    return () => window.clearTimeout(t)
-  }, [i])
-  const t = TESTIMONIALS[i]
-  return (
-    <figure
-      className={`flex cursor-pointer flex-col gap-[22px] rounded-[18px] border border-[#FFFFFF]/30 bg-[#FFFFFF]/[0.14] px-[24px] py-[22px] text-[#FFFFFF] backdrop-blur-[14px] ${className}`}
-      onClick={() => setI((n) => (n + 1) % TESTIMONIALS.length)}
-    >
-      <Swap as="div" key={i} className="flex h-[44px] items-center gap-[14px]">
-        <span className="block h-[44px] w-[44px] shrink-0 overflow-hidden rounded-[8px] bg-[#FFFFFF]">
-          <img src={t.avatar} alt="" className="h-full w-full object-cover" style={{ transform: 'scale(2.2)', transformOrigin: '50% 12%' }} />
+/** Formulaire de demande : champs conditionnels selon le profil, validation locale. */
+function RegistrationForm({ profile, event, setEvent, className = '' }: { profile: ProfileKey; event: EventKey; setEvent: (e: EventKey) => void; className?: string }) {
+  const [values, setValues] = useState<FormValues>(EMPTY_FORM)
+  const [errors, setErrors] = useState<Partial<Record<keyof FormValues, string>>>({})
+  const [summary, setSummary] = useState<{ profile: ProfileKey; event: EventKey } | null>(null)
+  const [honeypot, setHoneypot] = useState('')
+  const [serverError, setServerError] = useState('')
+  const [status, setStatus] = useState<'idle' | 'sending'>('idle')
+  const startedAtRef = useRef(Date.now())
+  const selected = event === 'les-deux' ? Object.values(PROGRAMMES) : [PROGRAMMES[event]]
+
+  const set = (key: keyof FormValues) => (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const value = e.target.value
+    setValues((v) => ({ ...v, [key]: value }))
+    setErrors((prev) => ({ ...prev, [key]: undefined }))
+  }
+
+  const submit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    const next: Partial<Record<keyof FormValues, string>> = {}
+    if (!values.name.trim()) next.name = 'Indiquez votre nom complet.'
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email.trim())) next.email = 'Indiquez une adresse email valide.'
+    if (profile === 'partenaire' && !values.company.trim()) next.company = 'Indiquez le nom de votre entreprise.'
+    setErrors(next)
+    setServerError('')
+    if (Object.keys(next).length > 0) return
+
+    setStatus('sending')
+    try {
+      const response = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...values, profile, event, website: honeypot, startedAt: startedAtRef.current }),
+      })
+      const data: { ok?: boolean; message?: string; errors?: Record<string, string> } = await response.json()
+      if (!response.ok || !data.ok) {
+        if (data.errors) setErrors(data.errors)
+        setServerError(data.message || 'La demande n’a pas pu être envoyée. Réessayez.')
+        return
+      }
+      setSummary({ profile, event })
+    } catch {
+      setServerError('La demande n’a pas pu être envoyée. Réessayez.')
+    } finally {
+      setStatus('idle')
+    }
+  }
+
+  if (summary) {
+    return (
+      <div className={`flex flex-col justify-center text-[#000000] ${className}`}>
+        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#FF7900]">
+          <CheckIcon size={22} />
         </span>
-        <figcaption className={`flex-1 ${name}`}>{t.name}</figcaption>
-        <span className="text-[15px] leading-[1.45] opacity-70">{i + 1}/{TESTIMONIALS.length}</span>
-        <Ring k={i} />
-      </Swap>
-      <Swap as="blockquote" key={`q${i}`} className="min-h-[40px] text-[16px] font-medium uppercase leading-[1.28] tracking-[-0.003em]">{t.quote}</Swap>
-    </figure>
-  )
-}
-
-function LevelList({ width = 520 }: { width?: number }) {
-  const [active, setActive] = useState(DEFAULT_LEVEL)
-  return (
-    <ul style={{ width }} className="max-w-full">
-      {LEVELS.map((l, i) => {
-        const open = i === active
-        return (
-          <li key={l.title} className={i > 0 ? 'border-t border-[#FFFFFF]/15' : ''}>
-            <button
-              onClick={() => setActive(i)}
-              onMouseEnter={() => setActive(i)}
-              aria-expanded={open}
-              className={`relative flex w-full flex-col items-start justify-start overflow-hidden text-left transition-[height,padding] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${open ? 'pl-[18px]' : 'pl-0'}`}
-              style={{ height: open ? 123 : 69 }}
-            >
-              <span className={`absolute left-0 top-0 w-[2px] bg-[#FF7900] transition-all duration-700 ${open ? 'h-full' : 'h-0'}`} />
-              <span className={`block pt-[22px] ${name} transition-colors duration-500 ${open ? 'text-[#FF7900]' : 'text-[#FFFFFF]/30 hover:text-[#FFFFFF]/60'}`}>{l.title}</span>
-              <span className={`mt-[10px] block text-[15px] leading-[1.45] tracking-[-0.003em] text-[#FFFFFF]/70 transition-opacity duration-500 ${open ? 'opacity-100 delay-150' : 'opacity-0'}`}>
-                {l.description}
-              </span>
-            </button>
-          </li>
-        )
-      })}
-    </ul>
-  )
-}
-
-function Content({ mobile = false }: { mobile?: boolean }) {
-  return (
-    <>
-      <Reveal as="p" className="text-[12px] font-medium uppercase leading-[1.3]">{LABEL}</Reveal>
-      <div className="h-[40px] shrink-0" />
-      <Reveal as="h2" delay={150} className={mobile ? 'w-full' : ''}>
-        <span className={`flex items-center gap-[12px] ${heading}`}>
-          {LINE_1[0]}
-          <GolfBallIcon className="shrink-0 animate-[spin_10s_linear_infinite]" />
-          {LINE_1[1]}
-        </span>
-        <span className={`block opacity-[0.38] ${mobile ? 'w-full' : 'w-[487px]'} ${heading}`}>{LINE_2}</span>
-      </Reveal>
-    </>
-  )
-}
-
-function LevelsDesktop() {
-  return (
-    <Artboard id="levels" height={860} className="bg-white">
-      <div className="px-[24px]">
-        <div className="relative h-[860px] w-[1392px] overflow-hidden rounded-[26px] bg-[linear-gradient(143.13deg,#000000_14.29%,#000000_85.71%)] text-[#FFFFFF]">
-          <img src={PHOTO} alt="Golfer walking the fairway with his putter" style={at(696, 0, 696, 860)} className="object-cover" />
-          <div style={at(696, 0, 696, 860)} className="bg-[linear-gradient(180deg,rgba(0,0,0,0.35)_0%,rgba(0,0,0,0)_30%,rgba(0,0,0,0)_62%,rgba(0,0,0,0.75)_100%)]" />
-          <Reveal style={at(1003.5, 50, 81, 30)}><Logo /></Reveal>
-
-          <div style={at(72, 72, 560, 750)} className="flex flex-col items-start">
-            <Content />
-            <div className="h-[40px] shrink-0" />
-            <LevelList />
-            <div className="h-[36px] shrink-0" />
-            <Reveal as="p" className={name}>{QUESTION}</Reveal>
-            <div className="h-[12px] shrink-0" />
-            <Reveal as="p" delay={80} className="w-[520px] text-[14px] font-medium uppercase leading-[1.4] opacity-75">{NOTE}</Reveal>
-            <TextLink href={LINK.href} underlined className="text-[17px] font-medium leading-[1.3] tracking-[-0.005em] text-[#FF7900]">{LINK.label}</TextLink>
-            <div className="h-[30px] shrink-0" />
-            <Reveal>
-              <Button variant="cream" href="#contact" className="h-[64px] px-[32px] text-[17px] font-medium leading-[1.3] tracking-[-0.005em]">{BUTTON}</Button>
-            </Reveal>
-          </div>
-
-          <Reveal style={at(774, 660, 540, 152)} delay={200}>
-            <Testimonial className="h-[152px] w-[540px]" />
-          </Reveal>
-        </div>
+        <p className="mt-6 text-[12px] font-semibold uppercase tracking-[0.18em] text-[#B23A0A]">Récapitulatif</p>
+        <h3 className="mt-3 text-[30px] font-semibold leading-[1.08] tracking-[-0.02em]">Votre demande est prête</h3>
+        <p className="mt-3 text-[15px] leading-[1.6] text-[#000000]/65">
+          {values.name.trim()} · {PROFILES[summary.profile].title} · {EVENTS.find((option) => option.value === summary.event)?.label}
+        </p>
+        <p className="mt-2 break-all text-[15px]">{values.email.trim()}</p>
+        <p role="status" className="mt-3 text-[14px] text-[#000000]/70">
+          Votre demande a été transmise. L’équipe Orange Golf vous recontacte à l’adresse indiquée.
+        </p>
+        <button
+          type="button"
+          onClick={() => setSummary(null)}
+          className="mt-6 inline-flex min-h-11 items-center justify-center self-start rounded-md bg-[#FF7900] px-4 text-sm font-semibold text-black hover:bg-[#F06F00] focus-visible:outline-2 focus-visible:outline-offset-2"
+        >
+          Modifier ma demande
+        </button>
       </div>
-    </Artboard>
+    )
+  }
+
+  return (
+    <form
+      onSubmit={submit}
+      noValidate
+      className={`flex flex-col justify-center text-[#000000] ${className}`}
+      aria-busy={status === 'sending'}
+    >
+      <div aria-hidden="true" className="absolute -left-[9999px] h-px w-px overflow-hidden">
+        <label htmlFor="reg-website">Site web</label>
+        <input id="reg-website" name="website" tabIndex={-1} autoComplete="off" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} />
+      </div>
+      <h3 className="text-[26px] font-semibold leading-[1.1] tracking-[-0.02em]">Votre demande</h3>
+      <p className="mt-2 text-sm text-[#000000]/70">{PROFILES[profile].title} · Les champs marqués d’un * sont obligatoires.</p>
+
+      <div className="mt-6 flex flex-col gap-5 md:gap-6">
+        <div>
+          <label htmlFor="reg-event" className={label}>Événement *</label>
+          <Select id="reg-event" value={event} onChange={(e) => setEvent(e.target.value as EventKey)} options={EVENTS} />
+          <div aria-live="polite" className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-black/75">
+            {selected.map(({ city, date }) => (
+              <p key={city} className="flex items-center gap-2">
+                <CalendarIcon size={16} className="shrink-0 text-[#A64200]" />
+                <span><strong>{city}</strong> · {date}</span>
+              </p>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <label htmlFor="reg-name" className={label}>Nom complet *</label>
+          <input id="reg-name" name="name" autoComplete="name" value={values.name} onChange={set('name')} aria-invalid={Boolean(errors.name)} aria-describedby={errors.name ? 'err-name' : undefined} className={inputBase} placeholder="Ex. Awa Ndiaye" />
+          {errors.name && <p id="err-name" role="alert" className={errorText}>{errors.name}</p>}
+        </div>
+
+        <div className="grid grid-cols-2 gap-x-4 md:gap-x-6 [&>div]:min-w-0">
+          <div>
+            <label htmlFor="reg-email" className={label}>Email *</label>
+            <input id="reg-email" name="email" type="email" autoComplete="email" value={values.email} onChange={set('email')} aria-invalid={Boolean(errors.email)} aria-describedby={errors.email ? 'err-email' : undefined} className={inputBase} placeholder="vous@entreprise.cm" />
+            {errors.email && <p id="err-email" role="alert" className={errorText}>{errors.email}</p>}
+          </div>
+          <div>
+            <label htmlFor="reg-phone" className={label}>Téléphone</label>
+            <input id="reg-phone" name="phone" type="tel" autoComplete="tel" value={values.phone} onChange={set('phone')} className={inputBase} placeholder="+237 6 00 00 00 00" />
+          </div>
+        </div>
+
+        {profile === 'partenaire' ? (
+          <div className="grid grid-cols-2 gap-x-4 md:gap-x-6 [&>div]:min-w-0">
+            <div>
+              <label htmlFor="reg-company" className={label}>Entreprise *</label>
+              <input id="reg-company" name="company" autoComplete="organization" value={values.company} onChange={set('company')} aria-invalid={Boolean(errors.company)} aria-describedby={errors.company ? 'err-company' : undefined} className={inputBase} placeholder="Nom de l’entreprise" />
+              {errors.company && <p id="err-company" role="alert" className={errorText}>{errors.company}</p>}
+            </div>
+            <div>
+              <label htmlFor="reg-stand" className={label}>Type de stand</label>
+              <Select id="reg-stand" value={values.stand} onChange={set('stand')} options={['Standard', 'Premium', 'Sur mesure']} />
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-x-4 md:gap-x-6 [&>div]:min-w-0">
+            <div>
+              <label htmlFor="reg-level" className={label}>Niveau de jeu</label>
+              <Select id="reg-level" value={values.level} onChange={set('level')} options={['Débutant', 'Intermédiaire', 'Confirmé']} />
+            </div>
+            <div>
+              <label htmlFor="reg-formula" className={label}>Formule</label>
+              <Select id="reg-formula" value={values.formula} onChange={set('formula')} options={['Initiation', 'Compétition']} />
+            </div>
+          </div>
+        )}
+
+        <div>
+          <label htmlFor="reg-message" className={label}>Message (facultatif)</label>
+          <textarea id="reg-message" name="message" rows={4} value={values.message} onChange={set('message')} className={`${inputBase} h-auto min-h-28 resize-y py-2`} placeholder="Précisez vos besoins, votre équipe ou une question." />
+        </div>
+
+        <button
+          type="submit"
+          disabled={status === 'sending'}
+          className="mt-1 inline-flex min-h-11 w-full items-center justify-center rounded-md bg-[#FF7900] px-4 text-sm font-semibold text-black transition-colors hover:bg-[#F06F00] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black disabled:cursor-wait disabled:opacity-70"
+        >
+          {status === 'sending' ? 'Envoi en cours…' : 'Envoyer ma demande'}
+        </button>
+        {serverError && <p role="alert" className={errorText}>{serverError}</p>}
+        <p className="text-[12px] leading-[1.5] text-[#000000]/55">Vos données servent uniquement au traitement de votre demande.</p>
+      </div>
+    </form>
   )
 }
 
-function LevelsMobile() {
+function Select({ id, value, onChange, options }: { id: string; value: string; onChange: (e: ChangeEvent<HTMLSelectElement>) => void; options: (string | { value: string; label: string })[] }) {
   return (
-    <section id="levels" className="bg-white px-3">
-      <div className="overflow-hidden rounded-[20px] bg-[linear-gradient(160deg,#000000_14%,#000000_86%)] text-[#FFFFFF]">
-        <div className="flex flex-col items-start px-5 pb-10 pt-10 [&_h2_span]:!text-[34px]">
-          <Content mobile />
-          <div className="h-6" />
-          <LevelList width={600} />
-          <p className={`mt-8 ${name}`}>{QUESTION}</p>
-          <p className="mt-3 text-[13px] font-medium uppercase leading-[1.4] opacity-75">{NOTE}</p>
-          <TextLink href={LINK.href} underlined className="mt-1 text-[16px] font-medium text-[#FF7900]">{LINK.label}</TextLink>
-          <Button variant="cream" href="#contact" className="mt-7 h-[56px] px-7 text-[16px] font-medium">{BUTTON}</Button>
-        </div>
-        <div className="relative px-4 pb-4 pt-[300px]">
-          <img src={PHOTO} alt="Golfer walking the fairway with his putter" className="absolute inset-0 h-full w-full object-cover object-[70%_20%]" />
-          <div className="absolute inset-x-0 top-8 flex justify-center"><Logo /></div>
-          <Testimonial className="relative" />
+    <div className="relative">
+      <select id={id} value={value} onChange={onChange} className={`${inputBase} appearance-none pr-5`}>
+        {options.map((o) => {
+          const opt = typeof o === 'string' ? { value: o, label: o } : o
+          return <option key={opt.value} value={opt.value}>{opt.label}</option>
+        })}
+      </select>
+      <ChevronDownIcon size={16} className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 text-[#000000]/45" />
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------
+   Inscription — partenaires (stands) & joueurs / participants
+   ------------------------------------------------------------------ */
+
+function RegistrationSection() {
+  const [profile, setProfile] = useState<ProfileKey>('partenaire')
+  const [event, setEvent] = useState<EventKey>('kribi')
+
+  useEffect(() => {
+    function selectFromHash() {
+      if (window.location.hash === '#levels-douala') setEvent('douala')
+      if (window.location.hash === '#levels-kribi') setEvent('kribi')
+    }
+    selectFromHash()
+    window.addEventListener('hashchange', selectFromHash)
+    return () => window.removeEventListener('hashchange', selectFromHash)
+  }, [])
+
+  return (
+    <section id="levels" aria-labelledby="registration-heading" className="relative flex max-h-[100svh] flex-col bg-white pt-20 text-black md:pt-24">
+      <span id="levels-douala" className="absolute top-0" aria-hidden />
+      <span id="levels-kribi" className="absolute top-0" aria-hidden />
+      <div tabIndex={0} role="region" aria-label="Formulaire et choix du profil" className="min-h-0 overflow-y-auto focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#A64200]">
+        <div className="mx-auto grid max-w-[1160px] gap-5 px-5 pb-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] md:gap-12 md:px-10 md:pb-8">
+          <div>
+            <h2 id="registration-heading" className="text-[clamp(1.65rem,4vw,3.5rem)] font-semibold leading-tight tracking-[-0.035em]">Inscription à l’événement</h2>
+            <p className="mt-3 hidden max-w-[36ch] text-base leading-relaxed text-black/70 md:block">{BODY}</p>
+            <div className="mt-3 max-w-[360px] md:mt-6">
+              <ProfileChooser value={profile} onChange={setProfile} />
+              <p className="mt-3 hidden text-sm leading-relaxed text-black/70 md:block">{PROFILES[profile].blurb}</p>
+            </div>
+          </div>
+          <RegistrationForm profile={profile} event={event} setEvent={setEvent} />
         </div>
       </div>
     </section>
@@ -179,7 +286,12 @@ function LevelsMobile() {
 }
 
 export default function Levels() {
-  return <Responsive desktop={<LevelsDesktop />} mobile={<LevelsMobile />} />
+  useGoogleFonts()
+  return (
+    <div className="font-['Archivo',sans-serif] text-[#000000] antialiased">
+      <RegistrationSection />
+    </div>
+  )
 }
 
 /* ------------------------------------------------------------------
@@ -261,14 +373,20 @@ function prefersReducedMotion() {
 function Reveal({ children, delay = 0, as: Tag = 'div', className = '', style }: { children: ReactNode; delay?: number; as?: ElementType; className?: string; style?: CSSProperties }) {
   const ref = useRef<HTMLElement>(null)
   const [shown, setShown] = useState(false)
-  const [still] = useState(prefersReducedMotion)
+  const [still, setStill] = useState(false)
   useEffect(() => {
     const el = ref.current
-    if (!el || still) return
+    /* Lire la préférence seulement après l'hydratation : sinon le serveur et le client divergent. */
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    setStill(reduced)
+    if (!el || reduced) {
+      setShown(true)
+      return
+    }
     const io = new IntersectionObserver(([e]) => setShown(e.isIntersecting), { threshold: 0.15 })
     io.observe(el)
     return () => io.disconnect()
-  }, [still])
+  }, [])
   const on = still || shown
   return (
     <Tag
@@ -304,7 +422,7 @@ const BUTTON_VARIANTS = {
 }
 
 /** Pill button: fill sweeps in from the left, label rolls up, button lifts; shrinks on click. */
-function Button({ children, variant = 'lime', href = '#join', className = '' }: { children: ReactNode; variant?: keyof typeof BUTTON_VARIANTS; href?: string; className?: string }) {
+function Button({ children, variant = 'lime', href = '#levels', className = '' }: { children: ReactNode; variant?: keyof typeof BUTTON_VARIANTS; href?: string; className?: string }) {
   const v = BUTTON_VARIANTS[variant]
   const ease = 'ease-[cubic-bezier(0.16,1,0.3,1)]'
   return (
@@ -337,14 +455,14 @@ function TextLink({ children, href = '#', className = '', underlined = false }: 
 
 function Logo({ className = '' }: { className?: string }) {
   return (
-    <a href="#top" aria-label="Links — home" className={`inline-flex text-[30px] font-bold leading-none tracking-[-0.05em] ${className}`}>
+    <a href="#hero" aria-label="Orange Golf — accueil" className={`inline-flex text-[30px] font-bold leading-none tracking-[-0.05em] ${className}`}>
       <span className="text-[#FFFFFF]">Links</span>
       <span className="text-[#FF7900]">.</span>
     </a>
   )
 }
 
-type IconProps = SVGProps<SVGSVGElement> & { size?: number; stroke?: number }
+type IconProps = SVGProps<SVGSVGElement> & { size?: number }
 
 const DIMPLES = [
   [13.8, 13.8], [21.47, 10.92], [29.13, 13.8], [11.88, 21.47], [19.55, 19.55],
@@ -357,6 +475,31 @@ function GolfBallIcon({ size = 46, ...p }: IconProps) {
       {DIMPLES.map(([x, y], i) => (
         <circle key={i} cx={x + 1.535} cy={y + 1.535} r="1.535" fill="#CC6600" />
       ))}
+    </svg>
+  )
+}
+
+function CheckIcon({ size = 16, strokeWidth = 2, ...p }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" aria-hidden {...p}>
+      <path d="M2.5 8.5 6 12l7.5-8" />
+    </svg>
+  )
+}
+
+function ChevronDownIcon({ size = 16, strokeWidth = 1.8, ...p }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" aria-hidden {...p}>
+      <path d="m3.5 6 4.5 4.5L12.5 6" />
+    </svg>
+  )
+}
+
+function CalendarIcon({ size = 16, strokeWidth = 1.6, ...p }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" aria-hidden {...p}>
+      <rect x="2" y="3.2" width="12" height="11" rx="2" />
+      <path d="M2 6.6h12M5.4 1.8v2.8M10.6 1.8v2.8" />
     </svg>
   )
 }

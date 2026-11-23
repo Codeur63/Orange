@@ -5,20 +5,22 @@
  */
 import { useEffect, useRef, useState, type CSSProperties, type ElementType, type ReactNode, type SVGProps } from 'react'
 
+import SlotCard from './SlotCard'
+import { PROGRAMMES, type EventKey } from './programmes'
+
 /* ---------- Fonts & images ---------- */
 const FONT_URL = 'https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700&display=swap'
-const FEATURED_PHOTO = 'https://cdn.jiro.build/Golf/w1.webp'
+const FEATURED_PHOTO = '/images-featured.webp'
 
 /* ---------- Content ---------- */
 const LABEL = '[ L’agenda golf d’Orange Cameroun ]'
-const SINCE = { word: 'Since', digits: ['9', '8'] }
-const HEADING = ['Deux rendez-vous,', 'deux façons de', 'vivre le golf']
-const BODY = 'À Douala, découvrez le jeu et suivez la compétition. À Kribi, retrouvez les clients et partenaires d’Orange Business pour deux jours de golf et de rencontres professionnelles.'
+const SINCE = { word: 'Since', digits: ['1', '0'] }
+const HEADING = ['L’agenda', 'des deux événements']
+const BODY = 'À Kribi, le tournoi se joue le premier jour et les tables rondes ont lieu le lendemain. À Douala, l’initiation commence à 8 h et la remise des prix est prévue à 15 h. Retrouvez les horaires de chaque rendez-vous ci-dessous.'
 const LIVE_TAG = 'À la une'
 const SUBHEADING = 'Les temps forts'
-const WEEK = '[ Douala · Kribi ]'
 
-type CityKey = 'douala' | 'kribi'
+type CityKey = EventKey
 type Slot = { day: string; time: string; title: string }
 type City = { key: CityKey; name: string; title: string; bullets: string[]; link: string; schedule: Slot[] }
 
@@ -27,27 +29,17 @@ const CITIES: Record<CityKey, City> = {
     key: 'douala',
     name: 'Douala',
     title: 'Douala · Golf Open Day',
-    bullets: ['Compétition sur le parcours', 'Découverte du golf au bord du green'],
+    bullets: ['Initiation avec matériel fourni', 'Défis de putting, de drive et d’approche'],
     link: 'Voir le programme de Douala',
-    schedule: [
-      { day: 'Jour 1', time: '08 h 00', title: 'Accueil des participants' },
-      { day: '', time: '09 h 00', title: 'Départ sur le parcours' },
-      { day: '', time: '14 h 00', title: 'Découverte du golf au bord du green' },
-      { day: '', time: '17 h 00', title: 'Classement et remise des prix' },
-    ],
+    schedule: PROGRAMMES.douala.moments,
   },
   kribi: {
     key: 'kribi',
     name: 'Kribi',
     title: 'Kribi · Orange Golf Experience',
-    bullets: ['Golf au Kribi Golf & Country Club', 'Rencontres entre clients et partenaires d’Orange Business'],
+    bullets: ['Tournoi au Kribi Golf & Country Club', 'Tables rondes avec Orange Business'],
     link: 'Voir le programme de Kribi',
-    schedule: [
-      { day: 'Jour 1', time: '08 h 30', title: 'Accueil des invités' },
-      { day: '', time: '09 h 30', title: 'Départ sur le parcours' },
-      { day: 'Jour 2', time: '09 h 00', title: 'Deuxième tour' },
-      { day: '', time: '14 h 00', title: 'Rencontres clients et partenaires' },
-    ],
+    schedule: PROGRAMMES.kribi.moments,
   },
 }
 const DEFAULT_CITY: CityKey = 'douala'
@@ -72,7 +64,7 @@ function SinceBadge() {
 function Featured({ city, className = '', compact = false }: { city: City; className?: string; compact?: boolean }) {
   return (
     <div className={`group relative overflow-hidden rounded-[22px] ${className}`}>
-      <img src={FEATURED_PHOTO} alt="Golfer teeing off beside a links bunker" className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105" />
+      <img src={FEATURED_PHOTO} alt="Golfeur au départ d’un trou sur le parcours" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105" />
       <span className={`absolute left-[20px] top-[20px] flex h-[30px] items-center gap-[8px] rounded-full bg-[#FF7900] pl-[10px] pr-[14px] text-[#000000] ${micro}`}>
         <span className="relative flex h-[8px] w-[8px]">
           <span className="absolute inset-0 animate-ping rounded-full bg-[#000000]/60" />
@@ -101,48 +93,23 @@ function CityBlock({ city, active, onSelect, className = '' }: { city: City; act
       tabIndex={0}
       aria-pressed={active}
       onClick={onSelect}
-      onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onSelect())}
+      onKeyDown={(e) => e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onSelect())}
       className={`flex w-full cursor-pointer flex-col justify-between rounded-[18px] border p-[18px] text-left transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-[3px] hover:shadow-[0_14px_30px_-16px_rgba(0,0,0,0.35)] ${className} ${
         active ? 'border-[#000000] bg-[#000000] text-[#FFFFFF]' : 'border-[#CCCCCC] bg-white text-[#000000]'
       }`}
     >
       <div>
         <p className="text-[20px] font-medium leading-[1.25] tracking-[-0.01em]">{city.title}</p>
-        <ul className="mt-[10px] flex flex-col gap-[5px]">
-          {city.bullets.map((b) => (
-            <li key={b} className={`flex items-start gap-[9px] text-[14px] leading-[1.45] ${active ? 'text-[#FFFFFF]/70' : 'text-[#808080]'}`}>
-              <span aria-hidden className="mt-[7px] h-[5px] w-[5px] shrink-0 rounded-full bg-[#FF7900]" />
-              {b}
-            </li>
-          ))}
-        </ul>
+        <p className="mt-1 text-sm">{PROGRAMMES[city.key].date}</p>
       </div>
       <a
-        href="#programs"
+        href={`#programme-${city.key}`}
         onClick={(e) => e.stopPropagation()}
-        className={`mt-[14px] inline-flex items-center gap-[7px] self-start text-[14px] font-bold transition-colors duration-300 hover:text-[#FF7900] ${active ? 'text-[#FF7900]' : 'text-[#000000]'}`}
+        className={`mt-[14px] inline-flex items-center gap-[7px] self-start text-[14px] font-bold transition-colors duration-300 ${active ? 'text-[#FF7900] hover:text-[#FF7900]' : 'text-[#A64200] hover:text-[#A64200]'}`}
       >
         {city.link}
         <span aria-hidden>→</span>
       </a>
-    </div>
-  )
-}
-
-/** Carte « Horaire / Temps fort » d'un moment de la journée. */
-function SlotCard({ slot, featured = false }: { slot: Slot; featured?: boolean }) {
-  return (
-    <div className={`flex h-[112px] w-full items-center gap-[16px] rounded-[18px] border p-[18px] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-[3px] hover:shadow-[0_14px_30px_-16px_rgba(0,0,0,0.35)] ${
-      featured ? 'border-[#000000] bg-[#000000]' : 'border-[#CCCCCC] bg-white'
-    }`}>
-      <span className={`flex h-[76px] w-[86px] shrink-0 flex-col items-center justify-center rounded-[12px] text-[#000000] transition-colors duration-500 ${featured ? 'bg-[#FF7900]' : 'bg-[#F5F5F5]'}`}>
-        <span className={micro}>{slot.day || '· · ·'}</span>
-        <span className="text-[17px] font-medium leading-[1.2] tracking-[-0.015em]">{slot.time}</span>
-      </span>
-      <span className="flex min-w-0 flex-1 flex-col gap-[6px]">
-        <span className={`${micro} text-[#FF7900]`}>Temps fort</span>
-        <span className={`text-[16px] font-medium leading-[1.3] tracking-[-0.005em] transition-colors duration-500 ${featured ? 'text-[#FFFFFF]' : 'text-[#000000]'}`}>{slot.title}</span>
-      </span>
     </div>
   )
 }
@@ -155,16 +122,16 @@ function useCity() {
 function HappeningDesktop() {
   const { active, setActive, city } = useCity()
   return (
-    <Artboard id="happening" height={1210} className="bg-[#FFFFFF]">
-      <div className="relative h-[1210px] w-[1440px] bg-[#FFFFFF] text-[#000000]">
-        <Reveal as="p" style={at(48, 48)} className={`whitespace-nowrap text-[#FF7900] ${upper}`}>{LABEL}</Reveal>
+    <Artboard id="happening" height={1104} className="bg-[#FFFFFF]">
+      <div className="relative h-[1104px] w-[1440px] bg-[#FFFFFF] text-[#000000]">
+        <Reveal as="p" style={at(48, 48)} className={`whitespace-nowrap text-[#A64200] ${upper}`}>{LABEL}</Reveal>
         <Reveal style={at(1227.6, 48)} delay={100}><SinceBadge /></Reveal>
         <div style={at(48, 124, 1344, 1)} className="bg-[#CCCCCC]" />
 
         <Reveal as="h2" style={at(48, 158, 610)} delay={150} className="text-[50px] font-bold leading-[0.98] tracking-[-0.04em]">
           {HEADING.map((l) => <span key={l} className="block whitespace-nowrap">{l}</span>)}
         </Reveal>
-        <Reveal as="p" style={at(48, 330, 610)} delay={250} className="text-[18px] leading-[1.4] tracking-[-0.01em] text-[#808080]">{BODY}</Reveal>
+        <Reveal as="p" style={at(48, 330, 610)} delay={250} className="text-[18px] leading-[1.4] tracking-[-0.01em] text-[#666666]">{BODY}</Reveal>
 
         <Reveal style={at(700, 158, 692, 658)} delay={200}>
           <Featured city={city} className="h-[658px] w-[692px]" />
@@ -177,20 +144,13 @@ function HappeningDesktop() {
           <CityBlock city={CITIES.kribi} active={active === 'kribi'} onSelect={() => setActive('kribi')} className="h-[150px]" />
         </Reveal>
 
-        <Reveal as="h3" style={at(48, 852)} className="whitespace-nowrap text-[28px] font-medium leading-[1.2] tracking-[-0.015em]">{SUBHEADING}</Reveal>
-        <Reveal as="p" style={at(1192, 858, 200)} delay={100} className={`text-right text-[#FF7900] ${upper}`}>{WEEK}</Reveal>
-
-        {(['douala', 'kribi'] as CityKey[]).map((key, g) => (
-          <Reveal key={`label-${key}`} as="p" style={at(48 + g * 680, 902)} className={`text-[#FF7900] ${upper}`}>{CITIES[key].name}</Reveal>
-        ))}
-
-        {(['douala', 'kribi'] as CityKey[]).flatMap((key, g) =>
-          CITIES[key].schedule.map((slot, i) => (
-            <Reveal key={`${key}-${slot.time}`} style={at(48 + g * 680 + (i % 2) * 340, 940 + Math.floor(i / 2) * 128, 324, 112)} delay={(g * 2 + i) * 70}>
-              <SlotCard slot={slot} featured={i === 0} />
-            </Reveal>
-          ))
-        )}
+        <h3 style={at(48, 852)} className="text-[28px] font-medium leading-[1.2] tracking-[-0.015em]">{SUBHEADING} à {city.name}</h3>
+        <p aria-live="polite" style={at(48, 902)} className={`text-[#A64200] ${upper}`}>{city.name} · {PROGRAMMES[active].date}</p>
+        <div style={at(48, 940, 1344)} className="grid grid-cols-4 gap-4">
+          {city.schedule.map((slot, i) => (
+            <SlotCard key={slot.time} {...slot} featured={i === 0} />
+          ))}
+        </div>
       </div>
     </Artboard>
   )
@@ -201,13 +161,13 @@ function HappeningMobile() {
   return (
     <section id="happening" className="bg-[#FFFFFF] px-5 py-14 text-[#000000]">
       <div className="flex items-center justify-between gap-3 border-b border-[#CCCCCC] pb-5">
-        <p className="text-[13px] font-medium uppercase text-[#FF7900]">{LABEL}</p>
+        <p className="text-[13px] font-medium uppercase text-[#A64200]">{LABEL}</p>
         <div className="origin-right scale-[0.85]"><SinceBadge /></div>
       </div>
       <Reveal as="h2" className="mt-8 text-[40px] font-bold leading-[0.98] tracking-[-0.04em]">
         {HEADING.map((l) => <span key={l} className="block">{l}</span>)}
       </Reveal>
-      <Reveal as="p" delay={100} className="mt-5 text-[17px] leading-[1.4] tracking-[-0.01em] text-[#808080]">{BODY}</Reveal>
+      <Reveal as="p" delay={100} className="mt-5 text-[17px] leading-[1.4] tracking-[-0.01em] text-[#666666]">{BODY}</Reveal>
       <Reveal className="mt-9">
         <Featured city={city} compact className="aspect-[4/5] w-full" />
       </Reveal>
@@ -220,22 +180,15 @@ function HappeningMobile() {
         ))}
       </div>
 
-      <div className="mt-12 flex items-end justify-between gap-3">
-        <h3 className="text-[24px] font-medium leading-[1.2] tracking-[-0.015em]">{SUBHEADING}</h3>
-        <p className="shrink-0 text-[12px] font-medium uppercase text-[#FF7900]">{WEEK}</p>
-      </div>
-      {(['douala', 'kribi'] as CityKey[]).map((key) => (
-        <div key={`schedule-${key}`} className="mt-9">
-          <p className={`text-[#FF7900] ${micro}`}>{CITIES[key].name}</p>
-          <div className="mt-3 flex flex-col gap-3">
-            {CITIES[key].schedule.map((slot, i) => (
-              <Reveal key={`${key}-${slot.time}`} delay={i * 70}>
-                <SlotCard slot={slot} featured={i === 0} />
-              </Reveal>
-            ))}
-          </div>
+      <div className="mt-12">
+        <h3 className="text-[24px] font-medium leading-[1.2] tracking-[-0.015em]">{SUBHEADING} à {city.name}</h3>
+        <p aria-live="polite" className={`mt-3 text-[#A64200] ${micro}`}>{city.name} · {PROGRAMMES[active].date}</p>
+        <div className="mt-3 flex flex-col gap-3">
+          {city.schedule.map((slot, i) => (
+            <SlotCard key={slot.time} {...slot} featured={i === 0} />
+          ))}
         </div>
-      ))}
+      </div>
     </section>
   )
 }
@@ -323,14 +276,20 @@ function prefersReducedMotion() {
 function Reveal({ children, delay = 0, as: Tag = 'div', className = '', style }: { children: ReactNode; delay?: number; as?: ElementType; className?: string; style?: CSSProperties }) {
   const ref = useRef<HTMLElement>(null)
   const [shown, setShown] = useState(false)
-  const [still] = useState(prefersReducedMotion)
+  const [still, setStill] = useState(false)
   useEffect(() => {
     const el = ref.current
-    if (!el || still) return
+    /* Lire la préférence seulement après l'hydratation : sinon le serveur et le client divergent. */
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    setStill(reduced)
+    if (!el || reduced) {
+      setShown(true)
+      return
+    }
     const io = new IntersectionObserver(([e]) => setShown(e.isIntersecting), { threshold: 0.15 })
     io.observe(el)
     return () => io.disconnect()
-  }, [still])
+  }, [])
   const on = still || shown
   return (
     <Tag
@@ -366,7 +325,7 @@ const BUTTON_VARIANTS = {
 }
 
 /** Pill button: fill sweeps in from the left, label rolls up, button lifts; shrinks on click. */
-function Button({ children, variant = 'lime', href = '#join', className = '' }: { children: ReactNode; variant?: keyof typeof BUTTON_VARIANTS; href?: string; className?: string }) {
+function Button({ children, variant = 'lime', href = '#levels', className = '' }: { children: ReactNode; variant?: keyof typeof BUTTON_VARIANTS; href?: string; className?: string }) {
   const v = BUTTON_VARIANTS[variant]
   const ease = 'ease-[cubic-bezier(0.16,1,0.3,1)]'
   return (

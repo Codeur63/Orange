@@ -4,6 +4,7 @@
  * Needs: only React 18 + Tailwind CSS. Fonts load from Google Fonts (no npm package).
  */
 import { useEffect, useRef, useState, type CSSProperties, type ElementType, type MouseEvent, type ReactNode, type SVGProps } from 'react'
+import { CONSENT_OPEN_EVENT } from '@/lib/consent'
 
 /* ---------- Fonts & images ---------- */
 const FONT_URL = 'https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700&display=swap'
@@ -13,26 +14,15 @@ const FONT_URL = 'https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;
 const NAV = [
   { label: 'Accueil', href: '#hero' },
   { label: 'À propos', href: '#about' },
-  { label: 'Programme', href: '#programs' },
   { label: 'Agenda', href: '#happening' },
-  { label: 'Contact', href: '#contact' },
-]
-const QUICK = [
+  { label: 'Programme', href: '#programs' },
   { label: 'Galerie', href: '#gallery' },
   { label: 'Inscription', href: '#levels' },
 ]
 const WEATHER = 'Douala \\ Kribi \\ Cameroun'
-const CLUBHOUSE = { title: 'Orange Golf Cameroun', lines: ['Douala · Golf Open Day', 'Kribi · Orange Golf Experience', 'orange.cm'] }
+const CLUBHOUSE = { title: 'Orange Golf Cameroun', lines: ['Douala · Golf Open Day', 'Kribi · Orange Golf Experience'] }
 const COPYRIGHT = '© 2026 Orange Golf Cameroun. Tous droits réservés.'
 const YEAR = '2026'
-const PILLS = [
-  { label: 'À propos', href: '#about' },
-  { label: 'Programme', href: '#programs' },
-  { label: 'Agenda', href: '#happening' },
-  { label: 'Galerie', href: '#gallery' },
-  { label: 'Inscription', href: '#levels' },
-  { label: 'Contact', href: '#contact' },
-]
 
 const name = 'text-[20px] font-medium leading-[1.25] tracking-[-0.01em]'
 const small = 'text-[15px] leading-[1.45] tracking-[-0.003em]'
@@ -44,45 +34,53 @@ const toTop = (e: MouseEvent) => {
 
 function FooterDesktop() {
   return (
-    <Artboard id="contact" height={730} className="bg-[#000000]  ">
-      <footer className="relative m-5 mx-auto max-w-[1400px] rounded-xl bg-[linear-gradient(180deg,#000000_0%,#000000_100%)] text-[#FFFFFF] ">
-        <ul style={at(48, 60, 76)} className="flex flex-col gap-[26px]">
+    <Artboard height={730} className="bg-[#FF7900]">
+      <footer className="relative m-5 mx-auto max-w-[1400px] rounded-xl bg-[#FF7900] text-[#0B0B0B]">
+        <ul style={at(48, 60, 130)} className="flex flex-col gap-[18px]">
           {NAV.map((l, i) => (
             <Reveal as="li" key={l.label} delay={i * 70}>
-              <TextLink href={l.href} className={`${name} whitespace-nowrap hover:text-[#FF7900]`}>{l.label}</TextLink>
+              <TextLink href={l.href} className={`${name} whitespace-nowrap hover:text-[#FFFFFF]`}>{l.label}</TextLink>
             </Reveal>
           ))}
         </ul>
-        <ul style={at(1292, 60, 100)} className="flex flex-col items-end gap-[26px]">
-          {QUICK.map((l, i) => (
-            <Reveal as="li" key={l.label} delay={i * 70}>
-              <TextLink href={l.href} className={`${name} hover:text-[#FF7900]`}>{l.label}</TextLink>
-            </Reveal>
-          ))}
-        </ul>
+
         <Reveal style={at(570, 60, 300)} delay={120} className="flex flex-col items-center text-center">
-          <span className="text-[12px] font-medium uppercase leading-[1.3]">{WEATHER}</span>
+          <span className="text-[12px] font-semibold uppercase leading-[1.3] tracking-[0.08em]">{WEATHER}</span>
           <span className="h-[84px]" />
-          <span className="text-[17px] leading-[1.45] tracking-[-0.005em]">{CLUBHOUSE.title}</span>
+          <span className="text-[17px] font-semibold leading-[1.45] tracking-[-0.005em]">{CLUBHOUSE.title}</span>
           <span className="h-[10px]" />
-          <address className={`not-italic opacity-60 ${small}`}>
+          <p className={`opacity-70 ${small}`}>
             {CLUBHOUSE.lines.map((l) => <span key={l} className="block">{l}</span>)}
-          </address>
+          </p>
         </Reveal>
 
-        <div style={at(48, 300, 1344, 1)} className="bg-[#FFFFFF]/20" />
-        <p style={at(48, 328)} className={`whitespace-nowrap opacity-75 ${small}`}>{COPYRIGHT}</p>
-        <a href="#hero" onClick={toTop} style={at(1292, 328, 100)} className={`group text-right opacity-75 transition-opacity hover:opacity-100 ${small}`}>
+        <Reveal style={at(1090, 60, 310)} delay={180} className="flex flex-col items-end gap-3">
+          <span className="text-[12px] font-semibold uppercase tracking-[0.16em] opacity-70">Inscription</span>
+          <a
+            href="#levels"
+            className="group/cta inline-flex h-[52px] items-center gap-3 rounded-full bg-[#000000] px-6 text-[15px] font-semibold text-[#FFFFFF] transition-colors duration-300 hover:bg-[#FFFFFF] hover:text-[#000000]"
+          >
+            S’inscrire à l’événement
+            <span aria-hidden className="transition-transform duration-300 group-hover/cta:translate-x-1">→</span>
+          </a>
+        </Reveal>
+
+        <div style={at(48, 330, 1344, 1)} className="bg-[#000000]/20" />
+        <p style={at(48, 354)} className={`whitespace-nowrap opacity-75 ${small}`}>{COPYRIGHT}</p>
+        <button type="button" onClick={() => window.dispatchEvent(new Event(CONSENT_OPEN_EVENT))} style={at(980, 354, 220)} className={`text-left opacity-75 underline-offset-4 hover:opacity-100 hover:underline ${small}`}>
+          Gérer les cookies
+        </button>
+        <a href="#hero" onClick={toTop} style={at(1244, 354, 100)} className={`group text-right opacity-75 transition-opacity hover:opacity-100 ${small}`}>
           <span className="bg-[linear-gradient(currentColor,currentColor)] bg-[length:0%_1px] bg-[position:0_100%] bg-no-repeat transition-[background-size] duration-500 group-hover:bg-[length:100%_1px]">Retour en haut</span>
         </a>
 
-        <Reveal style={at(50, 400, 62, 62)}>
-          <CopyrightIcon size={62} color="#FFFFFF" />
+        <Reveal style={at(50, 420, 62, 62)}>
+          <GolfBall size={62} color="#000000" dimpleColor="#FF7900" />
         </Reveal>
         <Reveal
           as="p"
           delay={150}
-          style={{ ...at(136, 362, 1060, 290), fontSize: 362, lineHeight: '80%', letterSpacing: '-0.06em' }}
+          style={{ ...at(136, 382, 1060, 290), fontSize: 362, lineHeight: '80%', letterSpacing: '-0.06em' }}
           className="whitespace-nowrap font-bold"
           aria-hidden
         >
@@ -91,14 +89,6 @@ function FooterDesktop() {
         <span style={at(66, 644, 25, 46)} className={`flex items-center justify-center opacity-80 ${name}`}>
           <span className="-rotate-90 whitespace-nowrap">{YEAR}</span>
         </span>
-
-        <ul style={at(1283, 400, 109, 274)} className="flex flex-col items-end gap-[14px]">
-          {PILLS.map((p, i) => (
-            <Reveal as="li" key={p.label} delay={i * 70}>
-              <a href={p.href}><Chip tone="light">{p.label}</Chip></a>
-            </Reveal>
-          ))}
-        </ul>
       </footer>
     </Artboard>
   )
@@ -106,32 +96,31 @@ function FooterDesktop() {
 
 function FooterMobile() {
   return (
-    <footer id="contact" className="m-5 mx-auto max-w-[1400px] rounded-xl bg-[linear-gradient(180deg,#000000_0%,#000000_100%)] px-5 pb-10 pt-14 text-[#FFFFFF]">
-      <p className="text-center text-[12px] font-medium uppercase">{WEATHER}</p>
-      <div className="mt-10 grid grid-cols-2 gap-6">
-        <ul className="flex flex-col gap-4">
-          {NAV.map((l) => <li key={l.label}><a href={l.href} className={name}>{l.label}</a></li>)}
-        </ul>
-        <ul className="flex flex-col items-end gap-4">
-          {QUICK.map((l) => <li key={l.label}><a href={l.href} className={name}>{l.label}</a></li>)}
-        </ul>
-      </div>
-      <div className="mt-10 text-center">
-        <p className="text-[17px]">{CLUBHOUSE.title}</p>
-        <address className={`mt-2 not-italic opacity-60 ${small}`}>
-          {CLUBHOUSE.lines.map((l) => <span key={l} className="block">{l}</span>)}
-        </address>
-      </div>
-      <ul className="mt-10 flex flex-wrap justify-center gap-2">
-        {PILLS.map((p) => <li key={p.label}><a href={p.href}><Chip tone="light">{p.label}</Chip></a></li>)}
+    <footer className="m-5 mx-auto max-w-[1400px] rounded-xl bg-[#FF7900] px-5 pb-10 pt-12 text-[#0B0B0B]">
+      <p className="text-center text-[12px] font-semibold uppercase tracking-[0.08em]">{WEATHER}</p>
+      <ul className="mt-10 grid grid-cols-2 gap-x-6 gap-y-4">
+        {NAV.map((l) => <li key={l.label}><a href={l.href} className={name}>{l.label}</a></li>)}
       </ul>
+      <a
+        href="#levels"
+        className="mt-8 inline-flex h-[52px] w-full items-center justify-center gap-3 rounded-full bg-[#000000] px-6 text-[15px] font-semibold text-[#FFFFFF]"
+      >
+        S’inscrire à l’événement <span aria-hidden>→</span>
+      </a>
+      <div className="mt-9 text-center">
+        <p className="text-[17px] font-semibold">{CLUBHOUSE.title}</p>
+        <p className={`mt-2 opacity-70 ${small}`}>
+          {CLUBHOUSE.lines.map((l) => <span key={l} className="block">{l}</span>)}
+        </p>
+      </div>
       <Reveal className="mt-10 flex items-start gap-2">
-        <CopyrightIcon size={28} color="#FFFFFF" className="mt-2 shrink-0" />
+        <GolfBall size={28} color="#000000" dimpleColor="#FF7900" className="mt-3 shrink-0" />
         <p className="text-[26vw] font-bold leading-[0.8] tracking-[-0.06em]" aria-hidden>GOLF</p>
       </Reveal>
-      <div className="mt-6 h-px bg-[#FFFFFF]/20" />
-      <div className={`mt-4 flex items-center justify-between opacity-75 ${small} !text-[13px]`}>
+      <div className="mt-6 h-px bg-[#000000]/20" />
+      <div className={`mt-4 flex flex-col gap-2 opacity-75 sm:flex-row sm:items-center sm:justify-between ${small} !text-[13px]`}>
         <span>{COPYRIGHT}</span>
+        <button type="button" onClick={() => window.dispatchEvent(new Event(CONSENT_OPEN_EVENT))} className="underline-offset-4 hover:underline">Gérer les cookies</button>
         <a href="#hero" onClick={toTop}>Retour en haut</a>
       </div>
     </footer>
@@ -221,14 +210,20 @@ function prefersReducedMotion() {
 function Reveal({ children, delay = 0, as: Tag = 'div', className = '', style }: { children: ReactNode; delay?: number; as?: ElementType; className?: string; style?: CSSProperties }) {
   const ref = useRef<HTMLElement>(null)
   const [shown, setShown] = useState(false)
-  const [still] = useState(prefersReducedMotion)
+  const [still, setStill] = useState(false)
   useEffect(() => {
     const el = ref.current
-    if (!el || still) return
+    /* Lire la préférence seulement après l'hydratation : sinon le serveur et le client divergent. */
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    setStill(reduced)
+    if (!el || reduced) {
+      setShown(true)
+      return
+    }
     const io = new IntersectionObserver(([e]) => setShown(e.isIntersecting), { threshold: 0.15 })
     io.observe(el)
     return () => io.disconnect()
-  }, [still])
+  }, [])
   const on = still || shown
   return (
     <Tag
@@ -280,6 +275,21 @@ function CopyrightIcon({ size = 22, stroke, color = 'currentColor', ...p }: Icon
     <svg width={size} height={size} viewBox="0 0 60 60" fill="none" {...p}>
       <circle cx="30" cy="30" r="24" stroke={color} strokeWidth={(sw * 60) / size} />
       <path d="M38.5 24.5a10 10 0 1 0 0 11" stroke={color} strokeWidth={(sw * 60) / size} />
+    </svg>
+  )
+}
+
+const BALL_DIMPLES = [
+  [22, 14], [36, 13], [46, 24], [14, 26], [28, 25], [39, 35], [20, 38], [50, 38], [30, 47], [42, 47],
+]
+/** Golf ball mark for the footer: solid disc with cut-out dimples. */
+function GolfBall({ size = 28, color = '#000000', dimpleColor = '#FF7900', className = '' }: { size?: number; color?: string; dimpleColor?: string; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 60 60" className={className} aria-hidden>
+      <circle cx="30" cy="30" r="29" fill={color} />
+      {BALL_DIMPLES.map(([x, y], i) => (
+        <circle key={i} cx={x} cy={y} r="3.4" fill={dimpleColor} />
+      ))}
     </svg>
   )
 }

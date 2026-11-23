@@ -4,7 +4,7 @@ import GolfSportClubHeaderLinks from "@/components/templates/golf-sport-club-lan
 import CommunityLinks from "@/components/templates/golf-sport-club-landing-page-links/Community Links";
 import FeaturesLinks from "@/components/templates/golf-sport-club-landing-page-links/Features Links";
 import AboutUsLinks from "@/components/templates/golf-sport-club-landing-page-links/About Us Links";
-import LevelLinks from "@/components/templates/golf-sport-club-landing-page-links/Level Links";
+import LevelsLinks from "@/components/templates/golf-sport-club-landing-page-links/Level Links";
 import TeamLinks from "@/components/templates/golf-sport-club-landing-page-links/Team Links";
 import FooterLinks from "@/components/templates/golf-sport-club-landing-page-links/Footer Links";
 
@@ -13,9 +13,9 @@ export default function Home() {
     <main className="min-h-screen">
       <GolfSportClubHeaderLinks />
       <CommunityLinks />
-      <FeaturesLinks />
       <AboutUsLinks />
-      <LevelLinks />
+      <FeaturesLinks />
+      <LevelsLinks />
       <TeamLinks />
       <FooterLinks />
     </main>

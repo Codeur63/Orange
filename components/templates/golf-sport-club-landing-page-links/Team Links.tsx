@@ -10,17 +10,17 @@ const FONT_URL = 'https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;
 
 /* ---------- Content ---------- */
 const LABEL = '[ Galerie photos ]'
-const HEADING = ['Les moments forts,', 'en images.']
-const BODY = 'Retrouvez les temps forts des événements Orange Golf, à Douala comme à Kribi. Cliquez sur une photo pour l’agrandir.'
-const BUTTON = { label: 'Voir le programme', href: '#programs' }
+const HEADING = ['Le golf en images']
+const BODY = 'Découvrez en images les activités au programme à Douala et à Kribi. Cliquez sur une photo pour l’agrandir.'
+const BUTTON = { label: 'S’inscrire à l’événement', href: '#levels' }
 
 type Photo = { title: string; meta: string; tag: string; photo: string; caption: string }
 const PHOTOS: Photo[] = [
-  { title: 'Deux rendez-vous', meta: 'Douala · Kribi', tag: 'L’essentiel', photo: '/au_programme/Rendez-vous.png', caption: 'Deux rendez-vous autour du golf, deux façons de vivre l’expérience Orange.' },
-  { title: 'Découvrir le golf', meta: 'Douala · Golf Open Day', tag: 'Initiation', photo: '/au_programme/golf_rencontre.png', caption: 'Accueil et initiation encadrée au bord du green, pour tous les niveaux.' },
-  { title: 'Les jeux', meta: 'Douala · Golf Open Day', tag: 'Ateliers', photo: '/au_programme/golfeur.png', caption: 'Putting, drive et approche : des défis ludiques ouverts à tous les participants.' },
-  { title: 'Rencontres B2B', meta: 'Kribi · Orange Golf Experience', tag: 'Networking', photo: '/au_programme/echange_pro.png', caption: 'Clients et partenaires d’Orange Business se retrouvent autour du golf.' },
-  { title: 'Classement', meta: 'Kribi · Orange Golf Experience', tag: 'Célébration', photo: '/au_programme/classement.png', caption: 'Résultats, remise des prix et photo de groupe pour clôturer la journée.' },
+  { title: 'Deux rendez-vous', meta: 'Douala · Kribi', tag: 'L’essentiel', photo: '/au_programme/Rendez-vous.webp', caption: 'L’initiation à Douala, le golf d’affaires à Kribi.' },
+  { title: 'Découvrir le golf', meta: 'Douala · Golf Open Day', tag: 'Initiation', photo: '/au_programme/golf_rencontre.webp', caption: 'Accueil et initiation encadrée au bord du green, pour tous les niveaux.' },
+  { title: 'Les jeux', meta: 'Douala · Golf Open Day', tag: 'Ateliers', photo: '/au_programme/golfeur.webp', caption: 'Putting, drive et approche : des défis ludiques ouverts à tous les participants.' },
+  { title: 'Rencontres B2B', meta: 'Kribi · Orange Golf Experience', tag: 'Networking', photo: '/au_programme/echange_pro.webp', caption: 'Clients et partenaires d’Orange Business se retrouvent autour du golf.' },
+  { title: 'Classement', meta: 'Kribi · Orange Golf Experience', tag: 'Célébration', photo: '/au_programme/classement.webp', caption: 'Dîner de gala, annonce du classement et remise des prix aux équipes gagnantes.' },
 ]
 
 /* Grid positions inside the 1344 × 760 grid (Figma). */
@@ -38,7 +38,7 @@ const micro = 'text-[12px] font-medium uppercase leading-[1.3]'
 function PhotoCard({ p, featured = false, className = '', onOpen }: { p: Photo; featured?: boolean; className?: string; onOpen: () => void }) {
   return (
     <button type="button" onClick={onOpen} aria-label={`Agrandir la photo : ${p.title}`} className={`group relative block overflow-hidden rounded-[22px] bg-[#FFFFFF] text-left ${className}`}>
-      <img src={p.photo} alt={p.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.04]" />
+      <img src={p.photo} alt={`${p.title} — ${p.meta}`} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.04]" />
       <span className={`absolute left-[16px] top-[16px] rounded-full px-[10px] py-[5px] ${micro} ${featured ? 'bg-[#FF7900] text-[#000000]' : 'bg-[#000000] text-[#FF7900]'}`}>{p.tag}</span>
       <span className="absolute right-[16px] top-[16px] flex h-[36px] w-[36px] items-center justify-center rounded-full bg-[#FF7900] text-[#000000] opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100">
         <ZoomIcon size={16} />
@@ -95,7 +95,7 @@ function Lightbox({ index, photos, onClose, onPrev, onNext }: { index: number; p
 
       <div className="relative flex max-h-full w-full max-w-[1200px] flex-col items-center gap-5" onClick={(e) => e.stopPropagation()}>
         <div className="relative flex max-h-[78vh] w-full items-center justify-center">
-          <img key={p.photo} src={p.photo} alt={p.title} className="max-h-[78vh] w-auto max-w-full rounded-[14px] object-contain shadow-[0_30px_80px_-20px_rgba(0,0,0,0.9)]" />
+          <img key={p.photo} src={p.photo} alt={`${p.title} — ${p.caption}`} className="max-h-[78vh] w-auto max-w-full rounded-[14px] object-contain shadow-[0_30px_80px_-20px_rgba(0,0,0,0.9)]" />
           {photos.length > 1 && (
             <>
               <button type="button" onClick={onPrev} aria-label="Photo précédente" className="absolute left-0 flex h-12 w-12 items-center justify-center rounded-full border border-white/25 bg-black/50 text-white backdrop-blur-sm transition-all duration-300 hover:-translate-x-1 hover:border-[#FF7900] hover:text-[#FF7900] md:-left-16">
@@ -111,7 +111,7 @@ function Lightbox({ index, photos, onClose, onPrev, onNext }: { index: number; p
           <p className={`text-[#FF7900] ${micro}`}>{p.tag} · {p.meta}</p>
           <h3 className="mt-2 text-[24px] font-medium leading-[1.2] tracking-[-0.01em] md:text-[30px]">{p.title}</h3>
           <p className="mx-auto mt-2 max-w-[640px] text-[14px] leading-[1.5] text-white/65 md:text-[16px]">{p.caption}</p>
-          <p className={`mt-3 text-white/40 ${micro}`}>{index + 1} / {photos.length}</p>
+          <p className={`mt-3 text-white/65 ${micro}`}>{index + 1} / {photos.length}</p>
         </div>
       </div>
     </div>
@@ -131,15 +131,15 @@ function GalleryDesktop() {
           {/* Header (Figma: padding 110/48, row aligned to bottom) */}
           <div style={at(48, 110, 1344, 161)} className="flex items-end justify-between">
             <div className="flex w-[480px] flex-col gap-[20px]">
-              <Reveal as="p" className="text-[16px] font-medium uppercase leading-[1.28] tracking-[-0.003em] text-[#FF7900]">{LABEL}</Reveal>
+              <Reveal as="p" className="text-[16px] font-medium uppercase leading-[1.28] tracking-[-0.003em] text-[#A64200]">{LABEL}</Reveal>
               <Reveal as="h2" delay={150} className="text-[50px] font-medium leading-[1.08] tracking-[-0.03em]">
                 {HEADING.map((l) => <span key={l} className="block whitespace-nowrap">{l}</span>)}
               </Reveal>
             </div>
             <div className="flex w-[400px] flex-col items-end gap-[22px]">
-              <Reveal as="p" delay={200} className="text-right text-[17px] leading-[1.45] tracking-[-0.005em] text-[#808080]">{BODY}</Reveal>
+              <Reveal as="p" delay={200} className="text-right text-[17px] leading-[1.45] tracking-[-0.005em] text-[#666666]">{BODY}</Reveal>
               <Reveal delay={280}>
-                <Button variant="pine" href={BUTTON.href} className="h-[64px] px-[32px] text-[17px] font-medium leading-[1.3] tracking-[-0.005em]">{BUTTON.label}</Button>
+                <Button variant="lime" href={BUTTON.href} className="h-[64px] px-[32px] text-[17px] font-medium leading-[1.3] tracking-[-0.005em]">{BUTTON.label}</Button>
               </Reveal>
             </div>
           </div>
@@ -171,11 +171,11 @@ function GalleryMobile() {
   return (
     <>
       <section id="gallery" className="bg-[#FFFFFF] px-5 py-16 text-[#000000]">
-        <Reveal as="p" className="text-[14px] font-medium uppercase text-[#FF7900]">{LABEL}</Reveal>
+        <Reveal as="p" className="text-[14px] font-medium uppercase text-[#A64200]">{LABEL}</Reveal>
         <Reveal as="h2" delay={120} className="mt-4 text-[36px] font-medium leading-[1.08] tracking-[-0.03em]">{HEADING.join(' ')}</Reveal>
-        <Reveal as="p" delay={180} className="mt-5 text-[17px] leading-[1.45] text-[#808080]">{BODY}</Reveal>
+        <Reveal as="p" delay={180} className="mt-5 text-[17px] leading-[1.45] text-[#666666]">{BODY}</Reveal>
         <Reveal className="mt-6">
-          <Button variant="pine" href={BUTTON.href} className="h-[56px] px-7 text-[16px] font-medium">{BUTTON.label}</Button>
+          <Button variant="lime" href={BUTTON.href} className="h-[56px] px-7 text-[16px] font-medium">{BUTTON.label}</Button>
         </Reveal>
         <div className="mt-10 flex flex-col gap-4">
           {PHOTOS.map((p, i) => (
@@ -273,14 +273,20 @@ function prefersReducedMotion() {
 function Reveal({ children, delay = 0, as: Tag = 'div', className = '', style }: { children: ReactNode; delay?: number; as?: ElementType; className?: string; style?: CSSProperties }) {
   const ref = useRef<HTMLElement>(null)
   const [shown, setShown] = useState(false)
-  const [still] = useState(prefersReducedMotion)
+  const [still, setStill] = useState(false)
   useEffect(() => {
     const el = ref.current
-    if (!el || still) return
+    /* Lire la préférence seulement après l'hydratation : sinon le serveur et le client divergent. */
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    setStill(reduced)
+    if (!el || reduced) {
+      setShown(true)
+      return
+    }
     const io = new IntersectionObserver(([e]) => setShown(e.isIntersecting), { threshold: 0.15 })
     io.observe(el)
     return () => io.disconnect()
-  }, [still])
+  }, [])
   const on = still || shown
   return (
     <Tag
@@ -306,7 +312,7 @@ const BUTTON_VARIANTS = {
 }
 
 /** Pill button: fill sweeps in from the left, label rolls up, button lifts; shrinks on click. */
-function Button({ children, variant = 'lime', href = '#join', className = '' }: { children: ReactNode; variant?: keyof typeof BUTTON_VARIANTS; href?: string; className?: string }) {
+function Button({ children, variant = 'lime', href = '#levels', className = '' }: { children: ReactNode; variant?: keyof typeof BUTTON_VARIANTS; href?: string; className?: string }) {
   const v = BUTTON_VARIANTS[variant]
   const ease = 'ease-[cubic-bezier(0.16,1,0.3,1)]'
   return (
