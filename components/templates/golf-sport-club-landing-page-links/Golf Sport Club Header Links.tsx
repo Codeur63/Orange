@@ -3,12 +3,12 @@
  * 100% self-contained.
  * Needs: only React 18 + Tailwind CSS. Fonts load from Google Fonts (no npm package).
  */
+import Image from 'next/image'
 import { useEffect, useRef, useState, type CSSProperties, type ElementType, type ReactNode, type SVGProps } from 'react'
 
 import { PROGRAMMES } from './programmes'
 
 /* ---------- Fonts & images ---------- */
-const FONT_URL = 'https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700&display=swap'
 const HERO_PHOTO = '/Header.webp'
 
 /* ---------- Content ---------- */
@@ -114,7 +114,15 @@ function MobileNav() {
 function EventHero() {
   return (
     <section id="hero" className="relative isolate flex min-h-[100svh] items-center overflow-hidden bg-black text-white">
-      <img src={HERO_PHOTO} alt="Golfeur sur un parcours lors d’un événement Orange Golf au Cameroun" fetchPriority="high" decoding="async" className="hero-zoom absolute inset-0 -z-20 h-full w-full object-cover object-[62%_center]" />
+      <Image
+        src={HERO_PHOTO}
+        alt="Golfeur sur un parcours lors d’un événement Orange Golf au Cameroun"
+        fill
+        sizes="100vw"
+        quality={82}
+        preload
+        className="hero-zoom -z-20 object-cover object-[62%_center]"
+      />
       <div className="absolute inset-0 -z-10 bg-gradient-to-b from-black/65 via-black/65 to-black/95" />
       <div className="mx-auto w-full max-w-[1400px] px-6 pb-14 pt-28 md:px-10 md:py-32">
         <h1 className="hero-fade-up max-w-[18ch] text-[clamp(2.5rem,7vw,6rem)] font-bold leading-[0.98] tracking-[-0.04em]">
@@ -142,7 +150,7 @@ function EventHero() {
 
 export default function Hero() {
   return (
-    <div className="font-['Archivo',sans-serif] antialiased">
+    <div className="font-archivo antialiased">
       <Responsive desktop={<DesktopNav />} mobile={<MobileNav />} />
       <EventHero />
     </div>
@@ -203,19 +211,7 @@ function Artboard({ height, className = '', id, children }: { height: number; cl
 
 /** Picks the desktop artboard or the mobile layout, loads the fonts and sets the base font + colour. */
 function Responsive({ desktop, mobile }: { desktop: ReactNode; mobile: ReactNode }) {
-  useGoogleFonts()
-  return <div className="font-['Archivo',sans-serif] text-[#000000] antialiased">{useIsDesktop() ? desktop : mobile}</div>
-}
-
-/** Adds the Google Fonts stylesheet to <head> once. */
-function useGoogleFonts() {
-  useEffect(() => {
-    if (document.querySelector(`link[href="${FONT_URL}"]`)) return
-    const link = document.createElement('link')
-    link.rel = 'stylesheet'
-    link.href = FONT_URL
-    document.head.appendChild(link)
-  }, [])
+  return <div className="font-archivo text-[#000000] antialiased">{useIsDesktop() ? desktop : mobile}</div>
 }
 
 const EASE = 'cubic-bezier(0.16,1,0.3,1)'

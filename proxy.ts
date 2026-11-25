@@ -13,7 +13,7 @@ export function proxy(request: NextRequest) {
   const host = hostHeader.split(':')[0].toLowerCase()
   const proto = request.headers.get('x-forwarded-proto')?.split(',')[0].trim().toLowerCase()
 
-  if (proto === 'http' && !LOCAL_HOSTS.has(host)) {
+  if (proto === 'http' && hostHeader && !LOCAL_HOSTS.has(host)) {
     // nextUrl can keep the internal host behind a reverse proxy: rebuild from Host.
     const url = new URL(`${request.nextUrl.pathname}${request.nextUrl.search}`, `https://${hostHeader}`)
     return NextResponse.redirect(url, 308)
@@ -27,5 +27,8 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+  // Les fichiers statiques ne passent pas par le proxy : cela évite aussi que
+  // l’optimiseur d’images interne (qui rejoue la requête sans en-têtes) soit
+  // intercepté et échoue sur une URL relative.
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:webp|avif|png|jpe?g|gif|svg|ico|txt|xml)$).*)'],
 }

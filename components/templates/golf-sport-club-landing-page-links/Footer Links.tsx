@@ -7,7 +7,6 @@ import { useEffect, useRef, useState, type CSSProperties, type ElementType, type
 import { CONSENT_OPEN_EVENT } from '@/lib/consent'
 
 /* ---------- Fonts & images ---------- */
-const FONT_URL = 'https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700&display=swap'
 
 /* ---------- Content ---------- */
 /** Uniquement des ancres qui existent réellement dans la page. */
@@ -185,19 +184,7 @@ function Artboard({ height, className = '', id, children }: { height: number; cl
 
 /** Picks the desktop artboard or the mobile layout, loads the fonts and sets the base font + colour. */
 function Responsive({ desktop, mobile }: { desktop: ReactNode; mobile: ReactNode }) {
-  useGoogleFonts()
-  return <div className="font-['Archivo',sans-serif] text-[#000000] antialiased">{useIsDesktop() ? desktop : mobile}</div>
-}
-
-/** Adds the Google Fonts stylesheet to <head> once. */
-function useGoogleFonts() {
-  useEffect(() => {
-    if (document.querySelector(`link[href="${FONT_URL}"]`)) return
-    const link = document.createElement('link')
-    link.rel = 'stylesheet'
-    link.href = FONT_URL
-    document.head.appendChild(link)
-  }, [])
+  return <div className="font-archivo text-[#000000] antialiased">{useIsDesktop() ? desktop : mobile}</div>
 }
 
 const EASE = 'cubic-bezier(0.16,1,0.3,1)'

@@ -7,6 +7,11 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  images: {
+    formats: ["image/avif", "image/webp"],
+    qualities: [75, 82],
+    minimumCacheTTL: 2678400,
+  },
   turbopack: {
     rules: {
       "*.css": {
