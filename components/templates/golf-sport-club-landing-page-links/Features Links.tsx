@@ -164,20 +164,29 @@ function IntroPanel({ programme, active, onChange, visible }: { programme: Progr
           <Swap key={`${active}-intro`} as="p" className="block border-t border-white/12 px-5 py-3 text-[13px] leading-[1.55] text-white/80 md:text-[14px]">{programme.intro}</Swap>
         </Reveal>
 
-        <Reveal as="p" delay={460} className="mt-6 hidden text-[12px] font-medium uppercase tracking-[0.16em] text-white/60 sm:block">Faites défiler pour découvrir les temps forts</Reveal>
       </div>
     </div>
   )
 }
 
+/** Numéro de chapitre en filigrane : décoratif, non annoncé aux lecteurs d’écran. */
+function Watermark({ n, className = '' }: { n: number; className?: string }) {
+  return (
+    <span aria-hidden className={`program-watermark pointer-events-none select-none font-extrabold leading-none tracking-[-0.08em] text-white/[0.05] ${className}`}>
+      {String(n).padStart(2, '0')}
+    </span>
+  )
+}
+
 /* ---------- Slide plein écran (grand écran) ---------- */
-function Slide({ moment, date, active, eager = false }: { moment: Moment; date: string; active: boolean; eager?: boolean }) {
+function Slide({ moment, date, active, number, eager = false }: { moment: Moment; date: string; active: boolean; number: number; eager?: boolean }) {
   return (
     <div inert={!active} className="relative isolate flex h-[100svh] w-full flex-none items-center justify-center overflow-hidden bg-[#000000]">
       <ZoomImage src={moment.image} alt={`Illustration du temps fort : ${moment.title}`} sizes="100vw" eager={eager} />
       <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.46)_0%,rgba(0,0,0,0.14)_50%,rgba(0,0,0,0.46)_100%)]" />
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.5)_0%,rgba(0,0,0,0.04)_32%,rgba(0,0,0,0.58)_100%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_55%_at_50%_54%,rgba(0,0,0,0.62)_0%,rgba(0,0,0,0)_76%)]" />
+      <Watermark n={number} className="absolute right-[3%] top-[47%] -translate-y-1/2 text-[clamp(12rem,26vw,26rem)]" />
 
       <div
         className="relative mx-auto flex w-full max-w-[880px] flex-col items-center px-6 py-24 text-center"
@@ -255,7 +264,7 @@ function StackedIntro({ programme, active, onChange }: { programme: Programme; a
   )
 }
 
-function StackedSlide({ moment, date, eager = false }: { moment: Moment; date: string; eager?: boolean }) {
+function StackedSlide({ moment, date, number, eager = false }: { moment: Moment; date: string; number: number; eager?: boolean }) {
   return (
     <div className="relative overflow-hidden px-5 py-7 md:px-8 md:py-10">
       <div className="relative mx-auto w-full max-w-[760px]" style={{ perspective: '1400px' }}>
@@ -268,7 +277,8 @@ function StackedSlide({ moment, date, eager = false }: { moment: Moment; date: s
               {moment.day} · {moment.time.replace(':', ' h ')}
             </p>
           </div>
-          <div className="p-5 md:p-7">
+          <Watermark n={number} className="absolute right-3 top-[26%] text-[clamp(7rem,26vw,11rem)]" />
+          <div className="relative z-10 p-5 md:p-7">
             <h3 className="text-[clamp(1.75rem,7vw,2.5rem)] font-extrabold leading-[1.02] tracking-[-0.035em] text-white">{moment.title}</h3>
             <p className="mt-3 text-[15px] leading-[1.65] text-white/75 md:text-[16px]">{moment.desc}</p>
             <div className="mt-5 flex flex-wrap gap-2">
@@ -328,7 +338,7 @@ function ProgrammeExperience({ programme, active, onChange }: { programme: Progr
       <div className="flex w-full flex-col bg-[#050505]">
         <StackedIntro programme={programme} active={active} onChange={onChange} />
         {programme.moments.map((m, i) => (
-          <StackedSlide key={m.title} moment={m} date={programme.date} eager={i === 0} />
+          <StackedSlide key={m.title} moment={m} date={programme.date} number={i + 1} eager={i === 0} />
         ))}
       </div>
     )
@@ -343,7 +353,7 @@ function ProgrammeExperience({ programme, active, onChange }: { programme: Progr
         >
           <IntroPanel programme={programme} active={active} onChange={onChange} visible={index === 0} />
           {programme.moments.map((m, i) => (
-            <Slide key={m.title} moment={m} date={programme.date} active={index === i + 1} eager={i === 0} />
+            <Slide key={m.title} moment={m} date={programme.date} number={i + 1} active={index === i + 1} eager={i === 0} />
           ))}
         </div>
 
