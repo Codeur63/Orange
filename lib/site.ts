@@ -8,6 +8,27 @@ export const OG_IMAGE_ALT =
   'Visible Orange Golf Cameroun : deux rendez-vous de golf à Douala et Kribi.'
 
 /**
- * URL canonique. À définir en production via NEXT_PUBLIC_SITE_URL (variable publique).
+ * Retourne une URL absolue valide, ou null pour une valeur vide, wildcard
+ * (`*.vercel.app`) ou invalide. Évite tout `ERR_INVALID_URL` au build.
  */
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://orange-golf.cm').replace(/\/$/, '')
+function toValidUrl(value?: string | null): string | null {
+  const trimmed = value?.trim()
+  if (!trimmed || trimmed.includes('*')) return null
+  const candidate = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`
+  try {
+    const url = new URL(candidate)
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return null
+    return url.toString().replace(/\/$/, '')
+  } catch {
+    return null
+  }
+}
+
+/**
+ * URL canonique utilisée par les métadonnées, le sitemap et robots.txt.
+ * Ordre : variable configurée, URL Vercel de déploiement, valeur par défaut.
+ */
+export const SITE_URL =
+  toValidUrl(process.env.NEXT_PUBLIC_SITE_URL) ??
+  toValidUrl(process.env.VERCEL_URL) ??
+  'https://orange-golf.cm'

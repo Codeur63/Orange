@@ -9,6 +9,9 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+.agents/
+.codex/
+AGENTS.md
 
 # testing
 /coverage

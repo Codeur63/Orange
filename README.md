@@ -15,7 +15,7 @@ npm run dev
 
 Copier `.env.example` vers `.env.local` et renseigner :
 
-- `NEXT_PUBLIC_SITE_URL` : URL canonique du site (sitemap, robots, métadonnées).
+- `NEXT_PUBLIC_SITE_URL` : URL canonique **complète** du site, par exemple `https://orange-golf.cm` ou `https://orange-golf.vercel.app`. Ne pas saisir un joker (`*.vercel.app`) : la valeur est ignorée et le build utilise alors l’URL Vercel du déploiement, puis `https://orange-golf.cm`.
 - `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` : domaine de l’instance Plausible. Le script n’est injecté qu’après consentement ; aucune donnée n’est chargée si la variable est absente.
 
 Ces deux variables sont **publiques** par conception. Ne jamais placer de clé secrète dans une variable `NEXT_PUBLIC_*` ni dans un composant client.
